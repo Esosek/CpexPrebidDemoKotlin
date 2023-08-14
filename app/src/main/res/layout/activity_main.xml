@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <!-- Small Rectangle Title TextView -->
+    <TextView
+        android:id="@+id/smallRectangleTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="Banner 300x50"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- Small Rectangle Ad Container -->
+    <FrameLayout
+        android:id="@+id/smallRectangleContainer"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/smallRectangleTitleTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <!-- Big Rectangle Title TextView -->
+    <TextView
+        android:id="@+id/bigRectangleTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/smallRectangleContainer"
+        android:layout_centerHorizontal="true"
+        android:text="Banner 300x250"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingTop="16dp"/>
+
+    <!-- Big Rectangle Ad Container -->
+    <FrameLayout
+        android:id="@+id/bigRectangleContainer"
+        android:layout_width="300dp"
+        android:layout_height="250dp"
+        android:layout_below="@id/bigRectangleTitleTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <!-- SAS Rectangle Title TextView -->
+    <TextView
+        android:id="@+id/sasRectangleTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="SAS Banner 300x50"
+        android:textSize="20sp"
+        android:textStyle="bold" />
+
+    <!-- SAS Rectangle Ad Container -->
+    <FrameLayout
+        android:id="@+id/sasRectangleContainer"
+        android:layout_width="300dp"
+        android:layout_height="50dp"
+        android:layout_below="@id/sasRectangleTitleTextView"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:background="@android:color/darker_gray" />
+
+    <!-- Ad Refresh Button -->
+    <Button
+        android:id="@+id/refreshButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/bigRectangleContainer"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Refresh Ads" />
+
+    <!-- CMP Show Button -->
+    <Button
+        android:id="@+id/showCmpButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/refreshButton"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="16dp"
+        android:text="Show CMP" />
+
+</RelativeLayout>
