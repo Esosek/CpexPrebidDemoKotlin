@@ -5,8 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.widget.Button
 import android.widget.FrameLayout
-import android.widget.TextView
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.fragment.app.FragmentActivity
 import org.prebid.mobile.AdSize
 import org.prebid.mobile.Host
@@ -14,21 +12,16 @@ import org.prebid.mobile.PrebidMobile
 import org.prebid.mobile.api.data.InitializationStatus
 import org.prebid.mobile.api.rendering.BannerView
 import com.google.android.gms.ads.MobileAds
-import com.google.android.gms.ads.admanager.AdManagerAdRequest
-import com.google.android.gms.ads.admanager.AdManagerAdView
-import org.prebid.mobile.api.rendering.listeners.BannerViewListener
 import org.prebid.mobile.eventhandlers.GamBannerEventHandler
 
 data class AdUnit(
-    val pbjsConfigId: String,
+    val pbsConfigId: String,
     val gamAdUnitId: String,
     val adSize: AdSize,
     val layoutContainerId: Int
 )
 
 class GamRenderingActivity : FragmentActivity() {
-
-
     companion object {
         // Magnite server config
         val PBS_HOST = Host.RUBICON
@@ -43,10 +36,10 @@ class GamRenderingActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.gam_rendering_activity) // Set the XML layout here
+        setContentView(R.layout.gam_rendering_activity) // Set the XML layout
         initPrebidSDK()
-        MobileAds.initialize(this) {}
-        val adUnits = setupAdUnits()
+        MobileAds.initialize(this) {} // Init Google SDK
+        val adUnits = setupAdUnits() // Map<String, BannerView>
 
         // Load the ads initially
         adUnits["smallRectangle"]?.loadAd()
@@ -55,7 +48,6 @@ class GamRenderingActivity : FragmentActivity() {
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
         refreshButton.setOnClickListener {
-            Log.d("CPEx", "Calling loadAd()")
             adUnits["smallRectangle"]?.loadAd()
             adUnits["bigRectangle"]?.loadAd()
         }
@@ -74,19 +66,19 @@ class GamRenderingActivity : FragmentActivity() {
         PrebidMobile.setShareGeoLocation(false)
     }
 
-    // Put together a single BannerView with GamEventHandler
+    // Configure single BannerView with GamEventHandler
     private fun createGamBannerAdUnit(pbsConfigId: String, gamAdUnitId : String, adSize: AdSize): BannerView {
         val eventHandler = GamBannerEventHandler(this, gamAdUnitId, adSize)
         return BannerView(this, pbsConfigId, eventHandler)
     }
 
-    // Setup complete ad units to a string map for better ad control
+    // Setup connections between UI and adUnits with String keys for better ad control
     private fun setupAdUnits(): Map<String, BannerView> {
         val adUnitViews = mutableMapOf<String, BannerView>()
 
         for ((adUnitName, adUnit) in adUnits) {
             val container = findViewById<FrameLayout>(adUnit.layoutContainerId)
-            val gamBanner = createGamBannerAdUnit(adUnit.pbjsConfigId, adUnit.gamAdUnitId, adUnit.adSize)
+            val gamBanner = createGamBannerAdUnit(adUnit.pbsConfigId, adUnit.gamAdUnitId, adUnit.adSize)
 
             container.addView(gamBanner)
             adUnitViews[adUnitName] = gamBanner
