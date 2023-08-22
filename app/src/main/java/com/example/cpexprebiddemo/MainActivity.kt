@@ -1,71 +1,30 @@
 package com.example.cpexprebiddemo
 
 import android.content.ContentValues.TAG
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
-import android.widget.FrameLayout
+import android.widget.Spinner
 import androidx.fragment.app.FragmentActivity
-import org.prebid.mobile.AdSize
-import org.prebid.mobile.Host
-import org.prebid.mobile.PrebidMobile
-import org.prebid.mobile.api.data.InitializationStatus
-import org.prebid.mobile.api.rendering.BannerView
 import io.didomi.sdk.Didomi
 import io.didomi.sdk.DidomiInitializeParameters
-import org.prebid.mobile.api.exceptions.AdException
-import org.prebid.mobile.api.rendering.listeners.BannerViewListener
 
 class MainActivity : FragmentActivity() {
-    // Prebid.org server config
-//    companion object {
-//        val PBS_HOST: Host = Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
-//        const val PBS_ACCOUNT_ID = "0689a263-318d-448b-a3d4-b02e8a709d9d"
-//        const val PBS_STATUS_ENDPOINT = "https://prebid-server-test-j.prebid.org/status"
-//    }
-
-    // Magnite server config
-    companion object {
-        val PBS_HOST = Host.RUBICON
-        const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // Set the XML layout here
         initDidomiSDK()
-        initPrebidSDK()
 
         // Display CMP UI
         // Always call it, checks internally if it's required
         Didomi.getInstance().setupUI(this)
 
-        // Create a banner ad unit
-        // val rectangle = createBannerAdUnit("prebid-ita-banner-320-50", width = 300, height = 50)
-        // val leaderboard =
-        //   createBannerAdUnit("prebid-demo-banner-multisize", width = 728, height = 90)
-        val smallRectangle = createBannerAdUnit("10900-imp-rectangle-300-50", width = 300, height = 50)
-        val bigRectangle =
-            createBannerAdUnit("10900-imp-rectangle-300-250", width = 300, height = 250)
-
-        val smallRectangleAdContainer = findViewById<FrameLayout>(R.id.smallRectangleContainer)
-        smallRectangleAdContainer.addView(smallRectangle)
-
-        val bigRectangleAdContainer = findViewById<FrameLayout>(R.id.bigRectangleContainer)
-        bigRectangleAdContainer.addView(bigRectangle)
-
-        // Load the ads initially
-        //rectangle.loadAd()
-        //leaderboard.loadAd()
-
-        // Set the "Refresh" button
-        val refreshButton = findViewById<Button>(R.id.refreshButton)
-        refreshButton.setOnClickListener {
-            smallRectangle.loadAd()
-            //smallRectangle.setAutoRefreshDelay(30)
-            bigRectangle.loadAd()
-            //bigRectangle.setAutoRefreshDelay(30)
-        }
+        // Display and handle dropdown that loads different adapters
+        spinnerHandler()
 
         // Set the "Show CMP" button
         val showCmpButton = findViewById<Button>(R.id.showCmpButton)
@@ -97,21 +56,36 @@ class MainActivity : FragmentActivity() {
         }
     }
 
-    private fun initPrebidSDK() {
-        PrebidMobile.setPrebidServerAccountId(PBS_ACCOUNT_ID)
-        PrebidMobile.setPrebidServerHost(PBS_HOST)
-        //PrebidMobile.setCustomStatusEndpoint(PBS_STATUS_ENDPOINT)
-        PrebidMobile.initializeSdk(applicationContext) { status ->
-            if (status == InitializationStatus.SUCCEEDED) {
-                Log.d(TAG, "Prebid: SDK initialized successfully!")
-            } else {
-                Log.e(TAG, "Prebid: SDK initialization error: $status\n${status.description}")
+    private fun spinnerHandler() {
+        val moduleSpinner = findViewById<Spinner>(R.id.moduleSpinner)
+        val moduleNames = arrayOf("None", "No ad server", "GAM Rendering API") // Add more module names
+        val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, moduleNames)
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        moduleSpinner.adapter = adapter
+
+        moduleSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long
+            ) {
+                if (position != 0) { // Check if "None" is not selected
+                    when (moduleNames[position]) {
+                        "No ad server" -> startActivity(
+                            Intent(
+                                this@MainActivity,
+                                NoAdServerActivity::class.java
+                            )
+                        )
+                        "GAM Rendering API" -> startActivity(Intent(this@MainActivity, GamRenderingActivity::class.java))
+                    }
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                // Handle case where nothing is selected
             }
         }
-        PrebidMobile.setShareGeoLocation(false)
-    }
-
-    private fun createBannerAdUnit(configId: String, width: Int, height: Int): BannerView {
-        return BannerView(this, configId, AdSize(width, height))
     }
 }
