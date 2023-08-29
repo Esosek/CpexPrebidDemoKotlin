@@ -25,6 +25,7 @@ class NoAdServerActivity : FragmentActivity() {
     companion object {
         val PBS_HOST = Host.RUBICON
         const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
+        const val PBS_TIMEOUT_MS = 2000
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -68,6 +69,7 @@ class NoAdServerActivity : FragmentActivity() {
         PrebidMobile.setPrebidServerAccountId(PBS_ACCOUNT_ID)
         PrebidMobile.setPrebidServerHost(PBS_HOST)
         //PrebidMobile.setCustomStatusEndpoint(PBS_STATUS_ENDPOINT)
+        PrebidMobile.setTimeoutMillis(PBS_TIMEOUT_MS)
         PrebidMobile.initializeSdk(applicationContext) { status ->
             if (status == InitializationStatus.SUCCEEDED) {
                 Log.d(TAG, "Prebid: SDK initialized successfully!")

@@ -15,10 +15,10 @@ import com.google.android.gms.ads.MobileAds
 import org.prebid.mobile.eventhandlers.GamBannerEventHandler
 
 data class AdUnit(
-    val pbsConfigId: String,
-    val gamAdUnitId: String,
-    val adSize: AdSize,
-    val layoutContainerId: Int
+    val pbsConfigId: String, // Stored Request ID in PBS example: '10900-imp-rectangle-300-50'
+    val gamAdUnitId: String, // GAM AdUnit path example: '/22631723832/com.example.cpexprebiddemo_small_rectangle'
+    val adSize: AdSize, // Requested size example: AdSize(300,50)
+    val layoutContainerId: Int // ID of <FrameLayout> example: R.id.smallRectangleContainer
 )
 
 class GamRenderingActivity : FragmentActivity() {
@@ -26,6 +26,7 @@ class GamRenderingActivity : FragmentActivity() {
         // Magnite server config
         val PBS_HOST = Host.RUBICON
         const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
+        const val PBS_TIMEOUT_MS = 2000
 
         // Ad Units definition
         private val adUnits = mapOf(
@@ -56,6 +57,7 @@ class GamRenderingActivity : FragmentActivity() {
     private fun initPrebidSDK() {
         PrebidMobile.setPrebidServerAccountId(PBS_ACCOUNT_ID)
         PrebidMobile.setPrebidServerHost(PBS_HOST)
+        PrebidMobile.setTimeoutMillis(PBS_TIMEOUT_MS)
         PrebidMobile.initializeSdk(applicationContext) { status ->
             if (status == InitializationStatus.SUCCEEDED) {
                 Log.d(TAG, "Prebid: SDK initialized successfully!")
