@@ -30,8 +30,8 @@ class GamRenderingActivity : FragmentActivity() {
 
         // Ad Units definition
         private val adUnits = mapOf(
-            "smallRectangle" to AdUnit("10900-imp-rectangle-300-50", "/22631723832/com.example.cpexprebiddemo_small_rectangle", AdSize(300,50), R.id.smallRectangleContainer),
-            "bigRectangle" to AdUnit("10900-imp-rectangle-300-250", "/22631723832/com.example.cpexprebiddemo_big_rectangle", AdSize(300,250), R.id.bigRectangleContainer)
+            "smallRectangle" to AdUnit("10900-imp-rectangle-300-50", "/22794528025/PrebidDemoAndroid_rectangle_1", AdSize(300,50), R.id.smallRectangleContainer),
+            "bigRectangle" to AdUnit("10900-imp-rectangle-300-250", "/22794528025/PrebidDemoAndroid_rectangle_2", AdSize(300,250), R.id.bigRectangleContainer)
         )
     }
 
