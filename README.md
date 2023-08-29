@@ -4,7 +4,7 @@ This is a demo app showcasing the integration of Prebid Mobile for Android platf
 
 ## Preview
 
-![Demo Preview](demo_preview.gif)
+<img src="demo_preview.gif" alt="Demo Preview" width="250">
 
 ## Integrations
 
