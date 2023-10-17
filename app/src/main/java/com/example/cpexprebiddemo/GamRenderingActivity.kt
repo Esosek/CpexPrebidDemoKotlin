@@ -46,6 +46,7 @@ class GamRenderingActivity : FragmentActivity() {
         adUnits["smallRectangle"]?.loadAd()
         adUnits["bigRectangle"]?.loadAd()
 
+
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
         refreshButton.setOnClickListener {
