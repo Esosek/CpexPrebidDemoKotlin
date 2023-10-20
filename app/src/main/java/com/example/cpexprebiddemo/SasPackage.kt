@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 data class AdUnit(
     val name: String,
     val size: List<Int>,
-    val layoutContainerId: Int // ID of <FrameLayout> example: R.id.smallRectangleContainer
+    val layoutContainerId: Int // ID of <FrameLayout> example: R.id.rectangleContainer_1
 )
 
 class SasPackage private constructor() {
