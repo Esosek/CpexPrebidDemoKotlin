@@ -48,6 +48,10 @@ class SasActivity : FragmentActivity() {
 
         // Configure WebView settings
         webView.settings.javaScriptEnabled = true
+        // Disable scrollbars
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
+
         webView.webViewClient = object : WebViewClient() {
             // By default click url is opened inside WebView
             // Force opening browser instead
