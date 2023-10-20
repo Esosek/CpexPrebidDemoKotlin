@@ -28,7 +28,7 @@
 
     <!-- Small Rectangle Ad Container -->
     <FrameLayout
-        android:id="@+id/smallRectangleContainer"
+        android:id="@+id/rectangleContainer_1"
         android:layout_width="300dp"
         android:layout_height="50dp"
         android:layout_below="@id/smallRectangleTitleTextView"
@@ -41,7 +41,7 @@
         android:id="@+id/bigRectangleTitleTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/smallRectangleContainer"
+        android:layout_below="@id/rectangleContainer_1"
         android:layout_centerHorizontal="true"
         android:text="Banner 300x250"
         android:textSize="20sp"
@@ -50,7 +50,7 @@
 
     <!-- Big Rectangle Ad Container -->
     <FrameLayout
-        android:id="@+id/bigRectangleContainer"
+        android:id="@+id/rectangleContainer_2"
         android:layout_width="300dp"
         android:layout_height="250dp"
         android:layout_below="@id/bigRectangleTitleTextView"
@@ -63,7 +63,7 @@
         android:id="@+id/refreshButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/bigRectangleContainer"
+        android:layout_below="@id/rectangleContainer_2"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="16dp"
         android:text="Refresh Ads" />

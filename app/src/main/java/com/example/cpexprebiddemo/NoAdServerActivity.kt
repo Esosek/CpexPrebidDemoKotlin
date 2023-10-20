@@ -45,10 +45,10 @@ class NoAdServerActivity : FragmentActivity() {
         val bigRectangle =
             createBannerAdUnit("10900-imp-rectangle-300-250", width = 300, height = 250)
 
-        val smallRectangleAdContainer = findViewById<FrameLayout>(R.id.smallRectangleContainer)
+        val smallRectangleAdContainer = findViewById<FrameLayout>(R.id.rectangleContainer_1)
         smallRectangleAdContainer.addView(smallRectangle)
 
-        val bigRectangleAdContainer = findViewById<FrameLayout>(R.id.bigRectangleContainer)
+        val bigRectangleAdContainer = findViewById<FrameLayout>(R.id.rectangleContainer_2)
         bigRectangleAdContainer.addView(bigRectangle)
 
         // Load the ads initially

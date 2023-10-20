@@ -58,7 +58,7 @@ class MainActivity : FragmentActivity() {
 
     private fun spinnerHandler() {
         val moduleSpinner = findViewById<Spinner>(R.id.moduleSpinner)
-        val moduleNames = arrayOf("None", "No ad server", "GAM Rendering API") // Add more module names
+        val moduleNames = arrayOf("None", "No ad server", "GAM Rendering API", "SAS Package") // Add more module names
         val adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, moduleNames)
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         moduleSpinner.adapter = adapter
@@ -79,6 +79,8 @@ class MainActivity : FragmentActivity() {
                             )
                         )
                         "GAM Rendering API" -> startActivity(Intent(this@MainActivity, GamRenderingActivity::class.java))
+                        "SAS Package" -> startActivity(Intent(this@MainActivity, SasActivity::class.java))
+
                     }
                 }
             }
