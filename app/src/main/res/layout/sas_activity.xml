@@ -46,7 +46,7 @@
         android:text="@string/banner_300x250"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:paddingTop="16dp"/>
+        android:paddingTop="32dp"/>
 
     <!-- Big Rectangle Ad Container -->
     <FrameLayout

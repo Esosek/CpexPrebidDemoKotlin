@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">CpexPrebidDemo</string>
     <string name="sas_package">SAS Package</string>
-    <string name="banner_300x50">Banner 300x50</string>
+    <string name="banner_300x50">Rectangle-1</string>
+    <string name="banner_300x250">Rectangle-2</string>
     <string name="refresh_ads">Refresh Ads</string>
-    <string name="banner_300x250">Banner 300x250</string>
 </resources>

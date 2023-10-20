@@ -21,7 +21,7 @@ data class AdUnit(
 class SasPackage private constructor() {
 
     private val instanceUrl = "https://optimics-ads.aimatch.com/optimics"
-    private val site = "com.example.cpex_prebid_sas"
+    private val site = "com.example.cpexprebiddemo"
     private var consentString: String? = null
 
     private val random: Int
