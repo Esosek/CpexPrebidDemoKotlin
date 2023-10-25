@@ -1,6 +1,5 @@
 package com.example.cpexprebiddemo.sas_package
 
-import android.util.Log
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -31,7 +30,7 @@ class SasActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sas_activity) // Set XML Layout
 
-        sasPackage = SasPackage.initialize()
+        sasPackage = SasPackage(applicationContext)
         prebid = PrebidHandler(applicationContext)
 
         // Load the ads initially

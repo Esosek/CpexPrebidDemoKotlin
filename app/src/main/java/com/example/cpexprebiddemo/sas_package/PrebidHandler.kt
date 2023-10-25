@@ -2,6 +2,9 @@ package com.example.cpexprebiddemo.sas_package
 
 import android.content.Context
 import android.util.Log
+import com.google.gson.JsonParser.parseString
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.prebid.mobile.BannerAdUnit
@@ -13,8 +16,9 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class PrebidHandler(context: Context) {
+class PrebidHandler (context: Context) {
     companion object {
+
         // Prebid.org server config
         const val PBS_DOMAIN = "https://prebid-server-test-j.prebid.org"
         val PBS_HOST: Host =
@@ -65,10 +69,10 @@ class PrebidHandler(context: Context) {
                     if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
                         val targeting = mapOf(
                             "hbid" to keywords["hb_pb"].toString(),
-                            "hbid_v" to "headerbid-app",
+                            "hbid_v" to "magnite_hb",
                             "hb_cache" to keywords["hb_cache_id_prebid"].toString()
                         )
-                        Log.d(LOG_TAG, "Keywords for ${adUnit.name}: $keywords")
+                        Log.d(LOG_TAG, "${adUnit.name}: setting targeting to $targeting")
                         adUnit.setTargeting(targeting) // Set targeting for the AdUnit
                     } else {
                         Log.d(LOG_TAG, "Fetching demand for ${adUnit.name} failed")
@@ -85,19 +89,19 @@ class PrebidHandler(context: Context) {
         }
     }
 
-
-
-
-
     // Get the HTML creative of the cached bid
-    fun getBid(cacheId: String): String {
-        val cacheUrl =  "$PBS_DOMAIN/cache?uuid=$cacheId"
+    suspend fun getBid(cacheId: String): String {
+        Log.d(LOG_TAG, "Fetching creative from Prebid cache $cacheId")
+        val cacheUrl = "$PBS_DOMAIN/cache?uuid=$cacheId"
 
         return try {
-            val res = sendGetRequest(cacheUrl)
-            Log.d(LOG_TAG, "PBS response: $res")
-            ""
-
+            val res = withContext(Dispatchers.IO) {
+                sendGetRequest(cacheUrl)
+            }
+            val jsonRes = parseString(res).asJsonObject
+            val creative = jsonRes.get("adm").asString
+            Log.d(LOG_TAG, "PBS creative: $creative")
+            creative
         } catch (e: Exception) {
             Log.e(LOG_TAG, "Fetching cached bid from PBS failed", e)
             ""

@@ -1,35 +1,35 @@
 package com.example.cpexprebiddemo.sas_package
 
 import android.util.Log
-import android.content.ContentValues.TAG
+import android.content.Context
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
 import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 
-class SasPackage private constructor() {
+// Initialize with applicationContext from the Activity.kt
+// It's needed for initializing PrebidHandler
+// Which is used for fetching cached won bids
+class SasPackage(context: Context) {
 
+    // SAS configuration
     private val instanceUrl = "https://optimics-ads.aimatch.com/optimics"
     private val site = "com.example.cpexprebiddemo"
+
+    // Internal references
+    private val logTag = "SasPackage"
+    private val prebid = PrebidHandler(context)
     private var consentString: String? = null
 
+    // Added to SAS call for cache busting
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
-
-    companion object {
-        private var instance: SasPackage? = null
-
-        fun initialize(): SasPackage {
-            return instance ?: SasPackage().also {
-                instance = it
-            }
-        }
-    }
 
     suspend fun requestAds(adUnits: List<AdUnit>): Map<AdUnit, String> {
         consentString = Didomi.getInstance().userStatus.consentString
@@ -45,7 +45,6 @@ class SasPackage private constructor() {
 
     private suspend fun requestSingleAd(adUnit: AdUnit): String {
         return withContext(Dispatchers.IO) {
-            val consentString = instance?.consentString
 
             var extTargeting = ""
 
@@ -55,10 +54,10 @@ class SasPackage private constructor() {
             }
 
             val parameters = listOf(
-                instance?.instanceUrl,
+                instanceUrl,
                 "hserver",
-                "random=${instance?.random}",
-                "site=${instance?.site}",
+                "random=${random}",
+                "site=${site}",
                 "mid=1137159316935798461",
                 consentString?.let { "gdpr=1" },
                 consentString?.let { "consent=$consentString" },
@@ -68,16 +67,27 @@ class SasPackage private constructor() {
             )
 
             val reqUrl = parameters.joinToString("/")
-            Log.d(TAG, "SAS request: $reqUrl")
+            Log.d(logTag, "SAS request: $reqUrl")
 
             try {
                 val res = sendGetRequest(reqUrl)
-                Log.d(TAG, "SAS response: $res")
-                res
+                Log.d(logTag, "SAS response: $res")
+                val creative = fetchPrebidCreative(res)
+                creative
             } catch (e: Exception) {
-                Log.e(TAG, "${adUnit.name}: Fetching ad from SAS failed", e)
+                Log.e(logTag, "${adUnit.name}: Fetching ad from SAS failed", e)
                 ""
             }
+        }
+    }
+
+    private fun fetchPrebidCreative(response: String): String {
+        return if (response.startsWith("hb_cache")) {
+            val hbCacheValue = response.substring(9)
+            val creative = runBlocking { prebid.getBid(hbCacheValue) }
+            creative
+        } else {
+            response
         }
     }
 
