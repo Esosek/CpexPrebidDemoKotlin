@@ -9,4 +9,11 @@ data class AdUnit(
     val layoutContainerId: Int,
     // (Optional) Name of the ad unit in Prebid Server, example: 10900-imp-rectangle-300-50
     val prebidId: String = ""
-)
+) {
+    // Extra targeting information that should be passed to ad sever
+    var targeting: Map<String, String> = emptyMap()
+        private set
+    fun setTargeting(targeting: Map<String, String>) {
+        this.targeting = targeting
+    }
+}

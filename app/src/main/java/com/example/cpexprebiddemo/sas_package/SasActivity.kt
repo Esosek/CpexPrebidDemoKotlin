@@ -20,16 +20,19 @@ class SasActivity : FragmentActivity() {
         // Ad Units definition
         private val adUnits = listOf(
             AdUnit("rectangle-1", listOf(300, 50), R.id.rectangleContainer_1, "prebid-ita-banner-320-50"),
-            //AdUnit("rectangle-2", listOf(300, 250), R.id.rectangleContainer_2)
+            AdUnit("rectangle-2", listOf(300, 250), R.id.rectangleContainer_2)
         )
     }
+
+    private lateinit var sasPackage: SasPackage
+    private lateinit var prebid: PrebidHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sas_activity) // Set XML Layout
 
-        val sasPackage = SasPackage.initialize()
-        val prebid = PrebidHandler(applicationContext)
+        sasPackage = SasPackage.initialize()
+        prebid = PrebidHandler(applicationContext)
 
         // Load the ads initially
 
@@ -37,18 +40,21 @@ class SasActivity : FragmentActivity() {
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
         refreshButton.setOnClickListener {
-            lifecycleScope.launch {
-                val hbTargeting = prebid.requestAd(adUnits[0])
-                Log.d("Main", "Prebid targeting: $hbTargeting")
-
-                // Request SAS with HB params and render response
-                //val results = runBlocking { sasPackage.requestAds(adUnits) }
-                //results.forEach { (adUnit, response) ->
-                //    renderAd(adUnit, response)
-                //}
-            }
-
+            requestAds()
         }
+    }
+
+    private fun requestAds() {
+        lifecycleScope.launch {
+            val adjAdUnits = prebid.requestAds(adUnits)
+
+            // Request SAS with HB params and render response
+            val results = runBlocking { sasPackage.requestAds(adjAdUnits) }
+            results.forEach { (adUnit, response) ->
+                renderAd(adUnit, response)
+            }
+        }
+
     }
 
     // Function to render an ad in a specified WebView container

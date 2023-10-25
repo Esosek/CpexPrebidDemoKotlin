@@ -43,25 +43,49 @@ class PrebidHandler(context: Context) {
         PrebidMobile.setShareGeoLocation(false)
     }
 
-    suspend fun requestAd(adUnit: AdUnit): Map<String, String> = suspendCoroutine { continuation ->
-        val banner = BannerAdUnit(adUnit.prebidId, adUnit.size[0], adUnit.size[1])
-
-        banner.fetchDemand { bidInfo, keywords ->
-            if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
-                val targeting = mapOf(
-                    "hbid" to keywords["hb_pb"].toString(),
-                    "hbid_v" to "headerbid-app",
-                    "hb_cache" to keywords["hb_cache_id_prebid"].toString()
-                )
-                Log.d(LOG_TAG, "Keywords for ${adUnit.name}: $keywords")
-                Log.d(LOG_TAG, "Result map ${adUnit.name}: $targeting")
-                continuation.resume(targeting)
-            } else {
-                Log.d(LOG_TAG, "Fetching demand for ${adUnit.name} failed")
-                continuation.resume(emptyMap()) // Handle the case where fetchDemand fails
+    suspend fun requestAds(adUnits: List<AdUnit>): List<AdUnit> = suspendCoroutine { continuation ->
+        var processedCount = 0
+        // Function to check if all ad units have been processed
+        fun checkCompletion() {
+            processedCount++
+            if (processedCount == adUnits.count()) {
+                continuation.resume(adUnits)
             }
         }
+
+        // Function to handle the response for a single ad unit
+        fun handleAdUnit(adUnit: AdUnit) {
+            if (adUnit.prebidId.isEmpty()) {
+                // Skip fetchDemand and add the AdUnit immediately
+                checkCompletion()
+            } else {
+                val banner = BannerAdUnit(adUnit.prebidId, adUnit.size[0], adUnit.size[1])
+
+                banner.fetchDemand { bidInfo, keywords ->
+                    if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
+                        val targeting = mapOf(
+                            "hbid" to keywords["hb_pb"].toString(),
+                            "hbid_v" to "headerbid-app",
+                            "hb_cache" to keywords["hb_cache_id_prebid"].toString()
+                        )
+                        Log.d(LOG_TAG, "Keywords for ${adUnit.name}: $keywords")
+                        adUnit.setTargeting(targeting) // Set targeting for the AdUnit
+                    } else {
+                        Log.d(LOG_TAG, "Fetching demand for ${adUnit.name} failed")
+                        adUnit.setTargeting(emptyMap()) // Handle the case where fetchDemand fails
+                    }
+                    checkCompletion()
+                }
+            }
+        }
+
+        // Start fetching demand for each ad unit
+        for (adUnit in adUnits) {
+            handleAdUnit(adUnit)
+        }
     }
+
+
 
 
 

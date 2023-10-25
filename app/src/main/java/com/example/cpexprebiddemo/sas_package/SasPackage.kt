@@ -47,6 +47,13 @@ class SasPackage private constructor() {
         return withContext(Dispatchers.IO) {
             val consentString = instance?.consentString
 
+            var extTargeting = ""
+
+            // Add parameters from the targeting map
+            for ((key, value) in adUnit.targeting) {
+                extTargeting += "$key=$value/"
+            }
+
             val parameters = listOf(
                 instance?.instanceUrl,
                 "hserver",
@@ -56,7 +63,8 @@ class SasPackage private constructor() {
                 consentString?.let { "gdpr=1" },
                 consentString?.let { "consent=$consentString" },
                 "area=${adUnit.name}",
-                "size=${adUnit.size[0]}x${adUnit.size[1]}"
+                "size=${adUnit.size[0]}x${adUnit.size[1]}",
+                extTargeting
             )
 
             val reqUrl = parameters.joinToString("/")
