@@ -51,7 +51,8 @@ class SasPackage(context: Context) {
 
             // Add parameters from the targeting map
             for ((key, value) in adUnit.targeting) {
-                extTargeting += "$key=$value/"
+                // Keys starting with _ (underscore) are internal and won't be send to SAS
+                if(!key.startsWith("_")) extTargeting += "$key=$value/"
             }
 
             val parameters = listOf(
@@ -73,7 +74,7 @@ class SasPackage(context: Context) {
             try {
                 val res = sendGetRequest(reqUrl)
                 Log.d(logTag, "SAS response: $res")
-                val creative = fetchPrebidCreative(res)
+                val creative = fetchPrebidCreative(res, adUnit.targeting["_hb_cache_host"]?:"")
                 creative
             } catch (e: Exception) {
                 Log.e(logTag, "${adUnit.name}: Fetching ad from SAS failed", e)
@@ -82,10 +83,10 @@ class SasPackage(context: Context) {
         }
     }
 
-    private fun fetchPrebidCreative(response: String): String {
+    private fun fetchPrebidCreative(response: String, cacheHost: String): String {
         return if (response.startsWith("hb_cache")) {
             val hbCacheValue = response.substring(9)
-            val creative = runBlocking { prebid.getBid(hbCacheValue) }
+            val creative = runBlocking { prebid.getBid(hbCacheValue, cacheHost) }
             creative
         } else {
             response

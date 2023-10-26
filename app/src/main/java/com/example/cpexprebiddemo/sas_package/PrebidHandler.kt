@@ -20,14 +20,12 @@ class PrebidHandler(context: Context) {
     companion object {
 
         // Prebid.org server config
-//        const val PBS_DOMAIN = "https://prebid-server-test-j.prebid.org"
 //        val PBS_HOST: Host =
-//            Host.createCustomHost("$PBS_DOMAIN/openrtb2/auction")
+//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
 //        const val PBS_ACCOUNT_ID = "0689a263-318d-448b-a3d4-b02e8a709d9d"
 //        const val PBS_TIMEOUT_MS = 1000
 
         // Magnite server config
-        const val PBS_CACHE_DOMAIN = "https://prebid-server-fra2.rubiconproject.com"
         val PBS_HOST = Host.RUBICON
         const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
         private const val PBS_TIMEOUT_MS = 2000
@@ -86,10 +84,12 @@ class PrebidHandler(context: Context) {
                     if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
                         Log.d(LOG_TAG, "${adUnit.name} keywords: $keywords")
                         val targeting = mapOf(
+                            // Keys starting with _ won't be send to SAS
                             //"hbid" to keywords["hb_pb"].toString(),
                             "hbid" to "0.2",
                             "hbid_v" to translatedBidder(keywords["hb_bidder"].toString()),
-                            "hb_cache" to keywords["hb_cache_id"].toString()
+                            "hb_cache" to keywords["hb_cache_id"].toString(),
+                            "_hb_cache_host" to keywords["hb_cache_host"].toString()
                         )
                         Log.d(LOG_TAG, "${adUnit.name}: setting targeting to $targeting")
                         adUnit.setTargeting(targeting) // Set targeting for the AdUnit
@@ -109,9 +109,9 @@ class PrebidHandler(context: Context) {
     }
 
     // Get the HTML creative of the cached bid
-    suspend fun getBid(cacheId: String): String {
+    suspend fun getBid(cacheId: String, cacheHost: String): String {
         Log.d(LOG_TAG, "Fetching creative from Prebid cache $cacheId")
-        val cacheUrl = "$PBS_CACHE_DOMAIN/cache?uuid=$cacheId"
+        val cacheUrl = "https://$cacheHost/cache?uuid=$cacheId"
 
         return try {
             val res = withContext(Dispatchers.IO) {

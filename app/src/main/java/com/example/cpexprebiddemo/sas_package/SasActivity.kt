@@ -15,7 +15,6 @@ import kotlinx.coroutines.runBlocking
 
 class SasActivity : FragmentActivity() {
     companion object {
-
         // Ad Units definition
         private val adUnits = listOf(
             // Prebid.org testing banner "prebid-ita-banner-320-50"
@@ -35,7 +34,7 @@ class SasActivity : FragmentActivity() {
         prebid = PrebidHandler(applicationContext)
 
         // Load the ads initially
-
+        requestAds()
 
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
