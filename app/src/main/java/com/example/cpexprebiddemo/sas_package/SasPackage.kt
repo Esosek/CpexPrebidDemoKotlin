@@ -26,6 +26,7 @@ class SasPackage(context: Context) {
     private val logTag = "SasPackage"
     private val prebid = PrebidHandler(context)
     private var consentString: String? = null
+    private var mid: String? = null
 
     // Added to SAS call for cache busting
     private val random: Int
@@ -58,7 +59,7 @@ class SasPackage(context: Context) {
                 "hserver",
                 "random=${random}",
                 "site=${site}",
-                "mid=1137159316935798461",
+                "mid=${mid ?: ""}",
                 consentString?.let { "gdpr=1" },
                 consentString?.let { "consent=$consentString" },
                 "area=${adUnit.name}",
@@ -99,7 +100,19 @@ class SasPackage(context: Context) {
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Unexpected code ${response.code}")
+            // Try to get MID value from SAS response
+            if (mid.isNullOrEmpty()) getMidFromResponse(response.headers.toString())
             return response.body?.string() ?: ""
         }
+    }
+
+    private fun getMidFromResponse(resHeaders: String) {
+        Log.d(logTag, "Trying to get MID from SAS response")
+        val regex = Regex("""mid=(\d+);""")
+        val matchResult = regex.find(resHeaders)
+        mid = matchResult?.groups?.get(1)?.value
+
+        if(mid != null) Log.d(logTag, "MID $mid stored")
+        else Log.d(logTag, "No MID found in response")
     }
 }
