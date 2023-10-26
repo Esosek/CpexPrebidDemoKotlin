@@ -16,15 +16,32 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class PrebidHandler (context: Context) {
+class PrebidHandler(context: Context) {
     companion object {
 
         // Prebid.org server config
-        const val PBS_DOMAIN = "https://prebid-server-test-j.prebid.org"
-        val PBS_HOST: Host =
-            Host.createCustomHost("$PBS_DOMAIN/openrtb2/auction")
-        const val PBS_ACCOUNT_ID = "0689a263-318d-448b-a3d4-b02e8a709d9d"
-        const val PBS_TIMEOUT_MS = 1000
+//        const val PBS_DOMAIN = "https://prebid-server-test-j.prebid.org"
+//        val PBS_HOST: Host =
+//            Host.createCustomHost("$PBS_DOMAIN/openrtb2/auction")
+//        const val PBS_ACCOUNT_ID = "0689a263-318d-448b-a3d4-b02e8a709d9d"
+//        const val PBS_TIMEOUT_MS = 1000
+
+        // Magnite server config
+        const val PBS_CACHE_DOMAIN = "https://prebid-server-fra2.rubiconproject.com"
+        val PBS_HOST = Host.RUBICON
+        const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
+        private const val PBS_TIMEOUT_MS = 2000
+
+        // BidderTable translates Prebid bidder name to SAS partner name
+        private val BIDDER_TABLE = mapOf(
+            "rubicon" to "magnite_hb_app",
+        )
+
+        // Translates Prebid bidder name to SAS name using BIDDER_TABLE
+        val translatedBidder: (String) -> String = { input ->
+            BIDDER_TABLE[input] ?: "headerbid-app"
+        }
+
         const val LOG_TAG = "PrebidHandler"
     }
 
@@ -49,6 +66,7 @@ class PrebidHandler (context: Context) {
 
     suspend fun requestAds(adUnits: List<AdUnit>): List<AdUnit> = suspendCoroutine { continuation ->
         var processedCount = 0
+
         // Function to check if all ad units have been processed
         fun checkCompletion() {
             processedCount++
@@ -64,18 +82,19 @@ class PrebidHandler (context: Context) {
                 checkCompletion()
             } else {
                 val banner = BannerAdUnit(adUnit.prebidId, adUnit.size[0], adUnit.size[1])
-
                 banner.fetchDemand { bidInfo, keywords ->
                     if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
+                        Log.d(LOG_TAG, "${adUnit.name} keywords: $keywords")
                         val targeting = mapOf(
-                            "hbid" to keywords["hb_pb"].toString(),
-                            "hbid_v" to "magnite_hb",
-                            "hb_cache" to keywords["hb_cache_id_prebid"].toString()
+                            //"hbid" to keywords["hb_pb"].toString(),
+                            "hbid" to "0.2",
+                            "hbid_v" to translatedBidder(keywords["hb_bidder"].toString()),
+                            "hb_cache" to keywords["hb_cache_id"].toString()
                         )
                         Log.d(LOG_TAG, "${adUnit.name}: setting targeting to $targeting")
                         adUnit.setTargeting(targeting) // Set targeting for the AdUnit
                     } else {
-                        Log.d(LOG_TAG, "Fetching demand for ${adUnit.name} failed")
+                        Log.d(LOG_TAG, "Prebid: No bid returned for ${adUnit.name}")
                         adUnit.setTargeting(emptyMap()) // Handle the case where fetchDemand fails
                     }
                     checkCompletion()
@@ -92,7 +111,7 @@ class PrebidHandler (context: Context) {
     // Get the HTML creative of the cached bid
     suspend fun getBid(cacheId: String): String {
         Log.d(LOG_TAG, "Fetching creative from Prebid cache $cacheId")
-        val cacheUrl = "$PBS_DOMAIN/cache?uuid=$cacheId"
+        val cacheUrl = "$PBS_CACHE_DOMAIN/cache?uuid=$cacheId"
 
         return try {
             val res = withContext(Dispatchers.IO) {
