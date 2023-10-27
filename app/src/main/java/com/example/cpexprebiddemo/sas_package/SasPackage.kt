@@ -8,7 +8,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -18,23 +17,41 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import org.prebid.mobile.Host
 import java.io.IOException
 import kotlin.random.Random
 
 // Initialize with context from the SaSActivity.kt
 // It's needed for PrebidHandler
 class SasPackage(private val context: FragmentActivity) {
-
     // SAS configuration
     private val instanceUrl = "https://optimics-ads.aimatch.com/optimics"
     private val site = "com.example.cpexprebiddemo"
 
+    //Prebid configuration
+    private val enablePrebid = false
+    private val pbsHost = Host.RUBICON
+    private val pbsAccountId = "10900-mobilewrapper-0"
+    private val pbsTimeoutMs = 1000
+
+    // Prebid.org testing server config
+//        pbsHost =
+//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
+//        pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d"
+//        pbsTimeoutMs = 1000
+
     // Internal references
     private val logTag = "SasPackage"
-    private val prebid = PrebidHandler(context)
     private var consentString: String? = null
     private var mid: String? = null
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    private lateinit var prebid: PrebidHandler
+
+    init {
+        if(enablePrebid) {
+            prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs)
+        }
+    }
 
     // Added to SAS call for cache busting
     private val random: Int
@@ -45,7 +62,8 @@ class SasPackage(private val context: FragmentActivity) {
         coroutineScope.launch {
             consentString = Didomi.getInstance().userStatus.consentString
 
-            val adjAdUnits = prebid.requestAds(adUnits)
+            var adjAdUnits = adUnits
+            if(enablePrebid) { adjAdUnits = prebid.requestAds(adUnits) }
 
             val deferredResults = adjAdUnits.map { adUnit ->
                 CoroutineScope(Dispatchers.IO).async {

@@ -3,10 +3,7 @@ package com.example.cpexprebiddemo.sas_package
 import android.os.Bundle
 import android.widget.Button
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.lifecycleScope
 import com.example.cpexprebiddemo.R
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 
 class SasActivity : FragmentActivity() {
     companion object {

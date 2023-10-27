@@ -16,45 +16,32 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class PrebidHandler(context: Context) {
-    companion object {
+class PrebidHandler(context: Context, pbsHost: Host, pbsAccountId: String, pbsTimeoutMs: Int) {
 
-        // Prebid.org server config
-//        val PBS_HOST: Host =
-//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
-//        const val PBS_ACCOUNT_ID = "0689a263-318d-448b-a3d4-b02e8a709d9d"
-//        const val PBS_TIMEOUT_MS = 1000
+    // BidderTable translates Prebid bidder name to SAS partner name
+    private val bidderTable = mapOf(
+        "rubicon" to "magnite_hb_app",
+    )
 
-        // Magnite server config
-        val PBS_HOST = Host.RUBICON
-        const val PBS_ACCOUNT_ID = "10900-mobilewrapper-0"
-        private const val PBS_TIMEOUT_MS = 2000
-
-        // BidderTable translates Prebid bidder name to SAS partner name
-        private val BIDDER_TABLE = mapOf(
-            "rubicon" to "magnite_hb_app",
-        )
-
-        // Translates Prebid bidder name to SAS name using BIDDER_TABLE
-        val translatedBidder: (String) -> String = { input ->
-            BIDDER_TABLE[input] ?: "headerbid-app"
-        }
-
-        const val LOG_TAG = "PrebidHandler"
+    // Translates Prebid bidder name to SAS name using BIDDER_TABLE
+    val translatedBidder: (String) -> String = { input ->
+        bidderTable[input] ?: "headerbid-app"
     }
+
+    private val logTag = "PrebidHandler"
 
     // Configure Prebid during initialization
     init {
-        PrebidMobile.setPrebidServerAccountId(PBS_ACCOUNT_ID)
-        PrebidMobile.setPrebidServerHost(PBS_HOST)
+        PrebidMobile.setPrebidServerAccountId(pbsAccountId)
+        PrebidMobile.setPrebidServerHost(pbsHost)
         //PrebidMobile.setCustomStatusEndpoint(PBS_STATUS_ENDPOINT)
-        PrebidMobile.setTimeoutMillis(PBS_TIMEOUT_MS)
+        PrebidMobile.setTimeoutMillis(pbsTimeoutMs)
         PrebidMobile.initializeSdk(context) { status ->
             if (status == InitializationStatus.SUCCEEDED) {
-                Log.d(LOG_TAG, "Prebid SDK initialized successfully!")
+                Log.d(logTag, "Prebid SDK initialized successfully!")
             } else {
                 Log.e(
-                    LOG_TAG,
+                    logTag,
                     "Prebid SDK initialization error: $status\n${status.description}"
                 )
             }
@@ -82,7 +69,7 @@ class PrebidHandler(context: Context) {
                 val banner = BannerAdUnit(adUnit.prebidId, adUnit.size[0], adUnit.size[1])
                 banner.fetchDemand { bidInfo, keywords ->
                     if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
-                        Log.d(LOG_TAG, "${adUnit.name} keywords: $keywords")
+                        Log.d(logTag, "${adUnit.name} keywords: $keywords")
                         val targeting = mapOf(
                             // Keys starting with _ won't be send to SAS
                             //"hbid" to keywords["hb_pb"].toString(),
@@ -91,10 +78,10 @@ class PrebidHandler(context: Context) {
                             "hb_cache" to keywords["hb_cache_id"].toString(),
                             "_hb_cache_host" to keywords["hb_cache_host"].toString()
                         )
-                        Log.d(LOG_TAG, "${adUnit.name}: setting targeting to $targeting")
+                        Log.d(logTag, "${adUnit.name}: setting targeting to $targeting")
                         adUnit.setTargeting(targeting) // Set targeting for the AdUnit
                     } else {
-                        Log.d(LOG_TAG, "Prebid: No bid returned for ${adUnit.name}")
+                        Log.d(logTag, "Prebid: No bid returned for ${adUnit.name}")
                         adUnit.setTargeting(emptyMap()) // Handle the case where fetchDemand fails
                     }
                     checkCompletion()
@@ -110,7 +97,7 @@ class PrebidHandler(context: Context) {
 
     // Get the HTML creative of the cached bid
     suspend fun getBid(cacheId: String, cacheHost: String): String {
-        Log.d(LOG_TAG, "Fetching creative from Prebid cache $cacheId")
+        Log.d(logTag, "Fetching creative from Prebid cache $cacheId")
         val cacheUrl = "https://$cacheHost/cache?uuid=$cacheId"
 
         return try {
@@ -119,10 +106,10 @@ class PrebidHandler(context: Context) {
             }
             val jsonRes = parseString(res).asJsonObject
             val creative = jsonRes.get("adm").asString
-            Log.d(LOG_TAG, "PBS creative: $creative")
+            Log.d(logTag, "PBS creative: $creative")
             creative
         } catch (e: Exception) {
-            Log.e(LOG_TAG, "Fetching cached bid from PBS failed", e)
+            Log.e(logTag, "Fetching cached bid from PBS failed", e)
             ""
         }
     }
