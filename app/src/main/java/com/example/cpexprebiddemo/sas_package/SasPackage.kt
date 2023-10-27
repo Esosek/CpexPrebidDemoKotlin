@@ -1,13 +1,13 @@
 package com.example.cpexprebiddemo.sas_package
 
 import android.app.Activity
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.fragment.app.FragmentActivity
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ import kotlin.random.Random
 // Initialize with applicationContext from the Activity.kt
 // It's needed for initializing PrebidHandler
 // Which is used for fetching cached won bids
-class SasPackage(context: Context) {
+class SasPackage(private val context: FragmentActivity) {
 
     // SAS configuration
     private val instanceUrl = "https://optimics-ads.aimatch.com/optimics"
@@ -39,7 +39,7 @@ class SasPackage(context: Context) {
         get() = (Random.nextDouble() * 100000000).toInt()
 
     // Exposed methods to use
-    suspend fun requestAds(adUnits: List<AdUnit>): Map<AdUnit, String> {
+    suspend fun requestAds(adUnits: List<AdUnit>) {
         consentString = Didomi.getInstance().userStatus.consentString
 
 //        val adjAdUnits =
@@ -53,11 +53,14 @@ class SasPackage(context: Context) {
                 adUnit to result
             }
         }
-        return deferredResults.associate { deferred -> deferred.await() }
+        val results = deferredResults.associate { deferred -> deferred.await() }
+        results.forEach { (adUnit, response) ->
+            renderAd(context, adUnit, response)
+        }
     }
 
     // Function to render an ad in a specified WebView container
-    fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
+    private fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
         val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
 
         val webView = WebView(context)

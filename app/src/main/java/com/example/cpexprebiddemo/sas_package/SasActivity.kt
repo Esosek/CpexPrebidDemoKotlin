@@ -25,7 +25,7 @@ class SasActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sas_activity) // Set XML Layout
 
-        sasPackage = SasPackage(applicationContext)
+        sasPackage = SasPackage(this)
         prebid = PrebidHandler(applicationContext)
 
         // Load the ads initially
@@ -43,10 +43,7 @@ class SasActivity : FragmentActivity() {
             val adjAdUnits = prebid.requestAds(adUnits)
 
             // Request SAS with HB params and render response
-            val results = runBlocking { sasPackage.requestAds(adjAdUnits) }
-            results.forEach { (adUnit, response) ->
-                sasPackage.renderAd(this@SasActivity, adUnit, response)
-            }
+            runBlocking { sasPackage.requestAds(adjAdUnits) }
         }
     }
 }
