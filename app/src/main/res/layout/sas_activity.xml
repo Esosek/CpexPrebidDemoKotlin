@@ -1,71 +1,124 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <!-- Integration Title -->
-    <TextView
-        android:id="@+id/integrationTitle"
-        android:layout_width="wrap_content"
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="@string/sas_package"
-        android:textSize="30sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="25dp"/>
+        android:padding="16dp"
+        tools:ignore="RedundantNamespace">
 
-    <!-- Small Rectangle Title TextView -->
-    <TextView
-        android:id="@+id/smallRectangleTitleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:text="@string/banner_300x50"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_below="@id/integrationTitle" />
+        <!-- Integration Title -->
+        <TextView
+            android:id="@+id/integrationTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_marginBottom="25dp"
+            android:text="@string/sas_package"
+            android:textSize="30sp"
+            android:textStyle="bold" />
 
-    <!-- Small Rectangle Ad Container -->
-    <FrameLayout
-        android:id="@+id/rectangleContainer_1"
-        android:layout_width="300dp"
-        android:layout_height="50dp"
-        android:layout_below="@id/smallRectangleTitleTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/darker_gray" />
+        <!-- Small Rectangle Title TextView -->
+        <TextView
+            android:id="@+id/smallRectangleTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/integrationTitle"
+            android:layout_centerHorizontal="true"
+            android:text="@string/banner_300x50"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <!-- Big Rectangle Title TextView -->
-    <TextView
-        android:id="@+id/bigRectangleTitleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rectangleContainer_1"
-        android:layout_centerHorizontal="true"
-        android:text="@string/banner_300x250"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:paddingTop="32dp"/>
+        <!-- Small Rectangle Ad Container -->
+        <FrameLayout
+            android:id="@+id/rectangleContainer_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@id/smallRectangleTitleTextView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray" />
 
-    <!-- Big Rectangle Ad Container -->
-    <FrameLayout
-        android:id="@+id/rectangleContainer_2"
-        android:layout_width="300dp"
-        android:layout_height="250dp"
-        android:layout_below="@id/bigRectangleTitleTextView"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:background="@android:color/darker_gray" />
+        <!-- Big Rectangle Title TextView -->
+        <TextView
+            android:id="@+id/bigRectangleTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rectangleContainer_1"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="32dp"
+            android:text="@string/banner_300x250"
+            android:textSize="20sp"
+            android:textStyle="bold" />
 
-    <!-- Ad Refresh Button -->
-    <Button
-        android:id="@+id/refreshButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/rectangleContainer_2"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="16dp"
-        android:text="@string/refresh_ads" />
+        <!-- Big Rectangle Ad Container -->
+        <FrameLayout
+            android:id="@+id/rectangleContainer_2"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@id/bigRectangleTitleTextView"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray" />
 
-</RelativeLayout>
+        <!-- Ad Refresh Button -->
+        <Button
+            android:id="@+id/refreshButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/rectangleContainer_2"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:text="@string/refresh_ads" />
+
+        <!-- Interscroller Title TextView -->
+        <TextView
+            android:id="@+id/interscrollerTitleTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/refreshButton"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="32dp"
+            android:text="@string/interscroller_1"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+        <!-- Filler Text -->
+        <TextView
+            android:id="@+id/fillerTextTop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/interscrollerTitleTextView"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="10dp"
+            android:text="@string/lorem_ipsum"
+            android:textSize="14sp"
+            android:textStyle="normal" />
+
+        <!-- Interscroller Ad Container -->
+        <FrameLayout
+            android:id="@+id/interscrollerContainer_1"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_below="@id/fillerTextTop"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="16dp"
+            android:background="@android:color/darker_gray" />
+
+        <!-- Filler Text -->
+        <TextView
+            android:id="@+id/fillerTextBottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/interscrollerContainer_1"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="32dp"
+            android:text="@string/lorem_ipsum"
+            android:textSize="14sp"
+            android:textStyle="normal" />
+
+    </RelativeLayout>
+</ScrollView>

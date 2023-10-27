@@ -127,6 +127,7 @@ object SasPackage {
     @SuppressLint("SetJavaScriptEnabled")
     private fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
         val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
+        resizeContainer(adContainer, adUnit)
 
         val webView = WebView(context)
         adContainer.addView(webView)
@@ -252,5 +253,12 @@ object SasPackage {
 
         if (mid != null) Log.d(logTag, "MID $mid stored")
         else Log.d(logTag, "No MID found in response")
+    }
+
+    private fun resizeContainer(container: FrameLayout, adUnit: AdUnit) {
+        val layoutParams = container.layoutParams
+        layoutParams.width = (adUnit.size[0] * context.resources.displayMetrics.density).toInt()
+        layoutParams.height = (adUnit.size[1] * context.resources.displayMetrics.density).toInt()
+        container.layoutParams = layoutParams
     }
 }
