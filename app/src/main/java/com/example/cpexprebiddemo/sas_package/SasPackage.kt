@@ -22,19 +22,13 @@ import org.prebid.mobile.Host
 import java.io.IOException
 import kotlin.random.Random
 
-// Initialize with context from the SaSActivity.kt
-// It's needed for PrebidHandler
 object SasPackage {
 
-    // SAS configuration
+    // Configuration
     private lateinit var instanceUrl: String
     private lateinit var site: String
-
-    //Prebid configuration
     private var enablePrebid = false
 
-
-    // Internal variable
     private const val logTag = "SasPackage"
     private var isInitialized = false
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -42,16 +36,22 @@ object SasPackage {
     private lateinit var context: FragmentActivity
     private var consentString: String? = null
     private var mid: String? = null
-
-    // Added to SAS call for cache busting
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
-    // Exposed methods to use
+    /**
+     * Configures SasPackage, must be called before using other methods
+     * @param context Required for rendering and PrebidSdk initialization
+     * @param instanceUrl Base domain of SAS ad server instance
+     * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
+     * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
+     * @param pbsAccountId (Required if Prebid enabled) ID of the wrapper stored on Prebid Server
+     * @param pbsTimeoutMs (Optional) Time in milliseconds to wait for Prebid Server response, defaults to 1000ms
+     * @param bidderTable (Optional) Translation table for Prebid bidder name to SAS partner name, defaults to "headerbid-app" for bidders that are not explicitly set
+     */
     fun initialize(
         context: FragmentActivity,
         instanceUrl: String,
-        site: String,
         enablePrebid: Boolean = false,
         pbsHost: Host? = null,
         pbsAccountId: String? = null,
@@ -60,7 +60,7 @@ object SasPackage {
     ) {
         this.context = context
         this.instanceUrl = instanceUrl
-        this.site = site
+        this.site = context.packageName
         this.enablePrebid = enablePrebid
 
         // Initialize Prebid if enabled
@@ -77,6 +77,11 @@ object SasPackage {
     }
 
     fun requestAds(adUnits: List<AdUnit>) {
+        if (!isInitialized) {
+            Log.e(
+                logTag, "SasPackage is NOT initialized, call SasPackage.initialize() first"
+            )
+        }
         coroutineScope.launch {
             consentString = Didomi.getInstance().userStatus.consentString
 
@@ -148,6 +153,7 @@ object SasPackage {
                 if (!key.startsWith("_")) extTargeting += "$key=$value/"
             }
 
+            /** Add random param to bust cache */
             val parameters = listOf(
                 instanceUrl,
                 "hserver",
@@ -188,9 +194,7 @@ object SasPackage {
 
     private fun sendGetRequest(url: String): String {
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(url)
-            .build()
+        val request = Request.Builder().url(url).build()
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Unexpected code ${response.code}")

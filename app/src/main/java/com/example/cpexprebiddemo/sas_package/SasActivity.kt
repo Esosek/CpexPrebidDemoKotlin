@@ -23,7 +23,6 @@ class SasActivity : FragmentActivity() {
         SasPackage.initialize(
             context = this,
             instanceUrl = "https://optimics-ads.aimatch.com/optimics",
-            site = "com.example.cpexprebiddemo",
             enablePrebid = true,
             pbsHost = Host.RUBICON,
             pbsAccountId = "10900-mobilewrapper-0",
