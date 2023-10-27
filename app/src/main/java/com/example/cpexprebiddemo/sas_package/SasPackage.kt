@@ -1,5 +1,6 @@
 package com.example.cpexprebiddemo.sas_package
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
@@ -23,47 +24,65 @@ import kotlin.random.Random
 
 // Initialize with context from the SaSActivity.kt
 // It's needed for PrebidHandler
-class SasPackage(private val context: FragmentActivity) {
+object SasPackage {
+
     // SAS configuration
-    private val instanceUrl = "https://optimics-ads.aimatch.com/optimics"
-    private val site = "com.example.cpexprebiddemo"
+    private lateinit var instanceUrl: String
+    private lateinit var site: String
 
     //Prebid configuration
-    private val enablePrebid = false
-    private val pbsHost = Host.RUBICON
-    private val pbsAccountId = "10900-mobilewrapper-0"
-    private val pbsTimeoutMs = 1000
+    private var enablePrebid = false
 
-    // Prebid.org testing server config
-//        pbsHost =
-//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
-//        pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d"
-//        pbsTimeoutMs = 1000
 
-    // Internal references
-    private val logTag = "SasPackage"
-    private var consentString: String? = null
-    private var mid: String? = null
+    // Internal variable
+    private const val logTag = "SasPackage"
+    private var isInitialized = false
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var prebid: PrebidHandler
-
-    init {
-        if(enablePrebid) {
-            prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs)
-        }
-    }
+    private lateinit var context: FragmentActivity
+    private var consentString: String? = null
+    private var mid: String? = null
 
     // Added to SAS call for cache busting
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
     // Exposed methods to use
+    fun initialize(
+        context: FragmentActivity,
+        instanceUrl: String,
+        site: String,
+        enablePrebid: Boolean = false,
+        pbsHost: Host? = null,
+        pbsAccountId: String? = null,
+        pbsTimeoutMs: Int = 1000
+    ) {
+        this.context = context
+        this.instanceUrl = instanceUrl
+        this.site = site
+        this.enablePrebid = enablePrebid
+
+        // Initialize Prebid if enabled
+        if (enablePrebid) {
+            if (pbsHost == null || pbsAccountId == null) {
+                Log.e(logTag, "Missing configuration for Prebid, won't initialize")
+            } else {
+                prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs)
+            }
+        }
+
+        isInitialized = true
+        Log.d(logTag, "SasPackage initialized successfully")
+    }
+
     fun requestAds(adUnits: List<AdUnit>) {
         coroutineScope.launch {
             consentString = Didomi.getInstance().userStatus.consentString
 
             var adjAdUnits = adUnits
-            if(enablePrebid) { adjAdUnits = prebid.requestAds(adUnits) }
+            if (enablePrebid) {
+                adjAdUnits = prebid.requestAds(adUnits)
+            }
 
             val deferredResults = adjAdUnits.map { adUnit ->
                 CoroutineScope(Dispatchers.IO).async {
@@ -82,6 +101,7 @@ class SasPackage(private val context: FragmentActivity) {
     }
 
     // Function to render an ad in a specified WebView container
+    @SuppressLint("SetJavaScriptEnabled")
     private fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
         val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
 
@@ -97,6 +117,7 @@ class SasPackage(private val context: FragmentActivity) {
         webView.webViewClient = object : WebViewClient() {
             // By default click url is opened inside WebView
             // Force opening browser instead
+            @Deprecated("Deprecated in Java")
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
                 view?.context?.startActivity(intent)
@@ -123,7 +144,7 @@ class SasPackage(private val context: FragmentActivity) {
             // Add parameters from the targeting map
             for ((key, value) in adUnit.targeting) {
                 // Keys starting with _ (underscore) are internal and won't be send to SAS
-                if(!key.startsWith("_")) extTargeting += "$key=$value/"
+                if (!key.startsWith("_")) extTargeting += "$key=$value/"
             }
 
             val parameters = listOf(
@@ -145,7 +166,7 @@ class SasPackage(private val context: FragmentActivity) {
             try {
                 val res = sendGetRequest(reqUrl)
                 Log.d(logTag, "SAS response: $res")
-                val creative = fetchPrebidCreative(res, adUnit.targeting["_hb_cache_host"]?:"")
+                val creative = fetchPrebidCreative(res, adUnit.targeting["_hb_cache_host"] ?: "")
                 creative
             } catch (e: Exception) {
                 Log.e(logTag, "${adUnit.name}: Fetching ad from SAS failed", e)
@@ -184,7 +205,7 @@ class SasPackage(private val context: FragmentActivity) {
         val matchResult = regex.find(resHeaders)
         mid = matchResult?.groups?.get(1)?.value
 
-        if(mid != null) Log.d(logTag, "MID $mid stored")
+        if (mid != null) Log.d(logTag, "MID $mid stored")
         else Log.d(logTag, "No MID found in response")
     }
 }

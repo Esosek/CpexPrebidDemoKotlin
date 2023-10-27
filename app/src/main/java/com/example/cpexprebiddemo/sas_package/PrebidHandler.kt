@@ -34,12 +34,9 @@ class PrebidHandler(context: Context, pbsHost: Host, pbsAccountId: String, pbsTi
     init {
         PrebidMobile.setPrebidServerAccountId(pbsAccountId)
         PrebidMobile.setPrebidServerHost(pbsHost)
-        //PrebidMobile.setCustomStatusEndpoint(PBS_STATUS_ENDPOINT)
         PrebidMobile.setTimeoutMillis(pbsTimeoutMs)
         PrebidMobile.initializeSdk(context) { status ->
-            if (status == InitializationStatus.SUCCEEDED) {
-                Log.d(logTag, "Prebid SDK initialized successfully!")
-            } else {
+            if (status != InitializationStatus.SUCCEEDED) {
                 Log.e(
                     logTag,
                     "Prebid SDK initialization error: $status\n${status.description}"

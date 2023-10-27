@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.widget.Button
 import androidx.fragment.app.FragmentActivity
 import com.example.cpexprebiddemo.R
+import org.prebid.mobile.Host
 
 class SasActivity : FragmentActivity() {
     companion object {
@@ -15,13 +16,24 @@ class SasActivity : FragmentActivity() {
         )
     }
 
-    private lateinit var sasPackage: SasPackage
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sas_activity) // Set XML Layout
 
-        sasPackage = SasPackage(this)
+        SasPackage.initialize(
+            context = this,
+            instanceUrl = "https://optimics-ads.aimatch.com/optimics",
+            site = "com.example.cpexprebiddemo",
+            enablePrebid = true,
+            pbsHost = Host.RUBICON,
+            pbsAccountId = "10900-mobilewrapper-0",
+            pbsTimeoutMs = 1000
+        )
+        // Prebid.org testing server config
+//        pbsHost =
+//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
+//        private const val pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d"
+//        private const val pbsTimeoutMs = 1000
 
         // Load the ads initially
         showAds()
@@ -34,6 +46,6 @@ class SasActivity : FragmentActivity() {
     }
 
     private fun showAds() {
-        sasPackage.requestAds(adUnits)
+        SasPackage.requestAds(adUnits)
     }
 }
