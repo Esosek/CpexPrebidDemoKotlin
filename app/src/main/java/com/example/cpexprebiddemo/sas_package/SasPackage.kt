@@ -55,7 +55,8 @@ object SasPackage {
         enablePrebid: Boolean = false,
         pbsHost: Host? = null,
         pbsAccountId: String? = null,
-        pbsTimeoutMs: Int = 1000
+        pbsTimeoutMs: Int = 1000,
+        bidderTable: Map<String, String> = emptyMap()
     ) {
         this.context = context
         this.instanceUrl = instanceUrl
@@ -67,7 +68,7 @@ object SasPackage {
             if (pbsHost == null || pbsAccountId == null) {
                 Log.e(logTag, "Missing configuration for Prebid, won't initialize")
             } else {
-                prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs)
+                prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs, bidderTable)
             }
         }
 

@@ -16,12 +16,13 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
-class PrebidHandler(context: Context, pbsHost: Host, pbsAccountId: String, pbsTimeoutMs: Int) {
-
-    // BidderTable translates Prebid bidder name to SAS partner name
-    private val bidderTable = mapOf(
-        "rubicon" to "magnite_hb_app",
-    )
+class PrebidHandler(
+    context: Context,
+    pbsHost: Host,
+    pbsAccountId: String,
+    pbsTimeoutMs: Int,
+    bidderTable: Map<String, String>
+) {
 
     // Translates Prebid bidder name to SAS name using BIDDER_TABLE
     val translatedBidder: (String) -> String = { input ->

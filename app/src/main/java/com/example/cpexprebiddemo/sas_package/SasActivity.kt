@@ -27,13 +27,17 @@ class SasActivity : FragmentActivity() {
             enablePrebid = true,
             pbsHost = Host.RUBICON,
             pbsAccountId = "10900-mobilewrapper-0",
-            pbsTimeoutMs = 1000
+            bidderTable = mapOf(
+                "rubicon" to "magnite_hb_app"
+            )
         )
-        // Prebid.org testing server config
-//        pbsHost =
-//            Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction")
-//        private const val pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d"
-//        private const val pbsTimeoutMs = 1000
+
+// Prebid.org testing Prebid server config
+//        SasPackage.initialize(
+//            ...
+//            pbsHost = Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction"),
+//            pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d",
+//        )
 
         // Load the ads initially
         showAds()
