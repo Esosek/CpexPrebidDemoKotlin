@@ -1,10 +1,15 @@
 package com.example.cpexprebiddemo.sas_package
 
-import android.util.Log
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.util.Log
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
-import kotlin.random.Random
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
@@ -12,6 +17,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
+import kotlin.random.Random
 
 // Initialize with applicationContext from the Activity.kt
 // It's needed for initializing PrebidHandler
@@ -32,8 +38,14 @@ class SasPackage(context: Context) {
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
+    // Exposed methods to use
     suspend fun requestAds(adUnits: List<AdUnit>): Map<AdUnit, String> {
         consentString = Didomi.getInstance().userStatus.consentString
+
+//        val adjAdUnits =
+//            withContext(CoroutineScope(Dispatchers.IO).coroutineContext) {
+//                prebid.requestAds(adUnits)
+//            }
 
         val deferredResults = adUnits.map { adUnit ->
             CoroutineScope(Dispatchers.IO).async {
@@ -44,6 +56,40 @@ class SasPackage(context: Context) {
         return deferredResults.associate { deferred -> deferred.await() }
     }
 
+    // Function to render an ad in a specified WebView container
+    fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
+        val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
+
+        val webView = WebView(context)
+        adContainer.addView(webView)
+
+        // Configure WebView settings
+        webView.settings.javaScriptEnabled = true
+        // Disable scrollbars
+        webView.isVerticalScrollBarEnabled = false
+        webView.isHorizontalScrollBarEnabled = false
+
+        webView.webViewClient = object : WebViewClient() {
+            // By default click url is opened inside WebView
+            // Force opening browser instead
+            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+                view?.context?.startActivity(intent)
+                return true
+            }
+        }
+
+        // Wrap the HTML creative to control rendered element
+        val wrappedCreative =
+            """<head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
+               <body style="margin: 0; overflow: hidden; height: ${adUnit.size[0]}px; width: ${adUnit.size[1]}px">
+               $response</body>"""
+
+        // Load the HTML content into the WebView
+        webView.loadData(wrappedCreative, "text/html", "UTF-8")
+    }
+
+    // Internal helper functions
     private suspend fun requestSingleAd(adUnit: AdUnit): String {
         return withContext(Dispatchers.IO) {
 
