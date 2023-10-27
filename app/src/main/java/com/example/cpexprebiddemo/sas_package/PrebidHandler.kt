@@ -16,6 +16,15 @@ import java.io.IOException
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
+/**
+ * A class for handling Prebid-related functionality including fetching Prebid bids and handling Prebid initialization.
+ *
+ * @param context The Android application context for Prebid initialization.
+ * @param pbsHost The hosted domain of the Prebid Server, including the /openrtb2/auction endpoint.
+ * @param pbsAccountId The ID of the wrapper stored on the Prebid Server.
+ * @param pbsTimeoutMs The time in milliseconds to wait for Prebid Server response (default is 1000ms).
+ * @param bidderTable (Optional) A translation table for Prebid bidder name to SAS partner name.
+ */
 class PrebidHandler(
     context: Context,
     pbsHost: Host,
@@ -24,14 +33,13 @@ class PrebidHandler(
     bidderTable: Map<String, String>
 ) {
 
-    // Translates Prebid bidder name to SAS name using BIDDER_TABLE
+    // Translates Prebid bidder name to SAS name using bidderTable
     val translatedBidder: (String) -> String = { input ->
         bidderTable[input] ?: "headerbid-app"
     }
 
     private val logTag = "PrebidHandler"
 
-    // Configure Prebid during initialization
     init {
         PrebidMobile.setPrebidServerAccountId(pbsAccountId)
         PrebidMobile.setPrebidServerHost(pbsHost)
@@ -47,6 +55,12 @@ class PrebidHandler(
         PrebidMobile.setShareGeoLocation(false)
     }
 
+    /**
+     * Requests Prebid bids for a list of custom AdUnit objects.
+     *
+     * @param adUnits The list of AdUnit objects to request Prebid bids for.
+     * @return A list of AdUnit objects with updated targeting data based on Prebid bids.
+     */
     suspend fun requestAds(adUnits: List<AdUnit>): List<AdUnit> = suspendCoroutine { continuation ->
         var processedCount = 0
 
@@ -69,8 +83,7 @@ class PrebidHandler(
                     if (bidInfo == ResultCode.SUCCESS && !keywords.isNullOrEmpty()) {
                         Log.d(logTag, "${adUnit.name} keywords: $keywords")
                         val targeting = mapOf(
-                            // Keys starting with _ won't be send to SAS
-                            //"hbid" to keywords["hb_pb"].toString(),
+                            // Keys starting with _ won't be sent to SAS
                             "hbid" to "0.2",
                             "hbid_v" to translatedBidder(keywords["hb_bidder"].toString()),
                             "hb_cache" to keywords["hb_cache_id"].toString(),
@@ -88,12 +101,18 @@ class PrebidHandler(
         }
 
         // Start fetching demand for each ad unit
-        for (adUnit in adUnits) {
-            handleAdUnit(adUnit)
+        for (adUnits in adUnits) {
+            handleAdUnit(adUnits)
         }
     }
 
-    // Get the HTML creative of the cached bid
+    /**
+     * Fetches the HTML creative of a cached bid from Prebid.
+     *
+     * @param cacheId The UUID of the cached bid.
+     * @param cacheHost The cache host for the Prebid creative.
+     * @return The HTML creative of the cached bid.
+     */
     suspend fun getBid(cacheId: String, cacheHost: String): String {
         Log.d(logTag, "Fetching creative from Prebid cache $cacheId")
         val cacheUrl = "https://$cacheHost/cache?uuid=$cacheId"

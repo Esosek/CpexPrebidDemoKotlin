@@ -22,6 +22,10 @@ import org.prebid.mobile.Host
 import java.io.IOException
 import kotlin.random.Random
 
+/**
+ * A singleton object representing the SasPackage responsible for showing ads.
+ * Including option to incorporate Prebid.
+ */
 object SasPackage {
 
     // Configuration
@@ -66,16 +70,23 @@ object SasPackage {
         // Initialize Prebid if enabled
         if (enablePrebid) {
             if (pbsHost == null || pbsAccountId == null) {
-                Log.e(logTag, "Missing configuration for Prebid, won't initialize")
+                Log.e(logTag, "Missing configuration for Prebid, initialization failed")
             } else {
                 prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs, bidderTable)
             }
         }
-
         isInitialized = true
         Log.d(logTag, "SasPackage initialized successfully")
     }
 
+    /**
+     * Entry point for showing ads
+     * - Gets current consent status from Didomi
+     * - Fetches demand from Prebid if enabled
+     * - Request ads from SAS incl. keywords for Prebid bids
+     * - Renders ad creatives
+     * @param adUnits List of custom AdUnit data class, Prebid is requested if AdUnit.prebidId is not empty
+     */
     fun requestAds(adUnits: List<AdUnit>) {
         if (!isInitialized) {
             Log.e(
@@ -106,7 +117,13 @@ object SasPackage {
         }
     }
 
-    // Function to render an ad in a specified WebView container
+    /**
+     * Function to render an ad in a specified WebView container.
+     *
+     * @param context The activity where the ad should be rendered
+     * @param adUnit The AdUnit data class containing ad information
+     * @param response The HTML creative to be rendered
+     */
     @SuppressLint("SetJavaScriptEnabled")
     private fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
         val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
@@ -141,7 +158,12 @@ object SasPackage {
         webView.loadData(wrappedCreative, "text/html", "UTF-8")
     }
 
-    // Internal helper functions
+    /**
+     * Requests a single ad unit from the SAS server based on the given AdUnit.
+     *
+     * @param adUnit The AdUnit to request from the SAS server.
+     * @return The HTML creative for the requested ad.
+     */
     private suspend fun requestSingleAd(adUnit: AdUnit): String {
         return withContext(Dispatchers.IO) {
 
@@ -149,15 +171,14 @@ object SasPackage {
 
             // Add parameters from the targeting map
             for ((key, value) in adUnit.targeting) {
-                // Keys starting with _ (underscore) are internal and won't be send to SAS
+                // Keys starting with _ (underscore) are internal and won't be sent to SAS
                 if (!key.startsWith("_")) extTargeting += "$key=$value/"
             }
 
-            /** Add random param to bust cache */
             val parameters = listOf(
                 instanceUrl,
-                "hserver",
-                "random=${random}",
+                "hserver", // SAS server endpoint that returns HTML
+                "random=${random}", // Cache buster
                 "site=${site}",
                 "mid=${mid ?: ""}",
                 consentString?.let { "gdpr=1" },
@@ -182,6 +203,13 @@ object SasPackage {
         }
     }
 
+    /**
+     * Fetches a Prebid creative from the response if available, or returns the original response.
+     *
+     * @param response The response from the SAS server.
+     * @param cacheHost The cache host for the Prebid creative.
+     * @return The Prebid creative or the original response.
+     */
     private fun fetchPrebidCreative(response: String, cacheHost: String): String {
         return if (response.startsWith("hb_cache")) {
             val hbCacheValue = response.substring(9)
@@ -192,6 +220,13 @@ object SasPackage {
         }
     }
 
+    /**
+     * Sends a GET request to the specified URL and returns the response as a string.
+     *
+     * @param url The URL to send the GET request to.
+     * @return The response from the server as a string.
+     * @throws IOException if the GET request is unsuccessful.
+     */
     private fun sendGetRequest(url: String): String {
         val client = OkHttpClient()
         val request = Request.Builder().url(url).build()
@@ -204,6 +239,11 @@ object SasPackage {
         }
     }
 
+    /**
+     * Extracts the MID (SAS user ID) from the SAS response headers, if available.
+     *
+     * @param resHeaders The response headers from the SAS server.
+     */
     private fun getMidFromResponse(resHeaders: String) {
         Log.d(logTag, "Trying to get MID from SAS response")
         val regex = Regex("""mid=(\d+);""")
