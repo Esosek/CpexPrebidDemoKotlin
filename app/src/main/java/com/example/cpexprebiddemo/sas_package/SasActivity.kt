@@ -19,17 +19,15 @@ class SasActivity : FragmentActivity() {
     }
 
     private lateinit var sasPackage: SasPackage
-    private lateinit var prebid: PrebidHandler
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.sas_activity) // Set XML Layout
 
         sasPackage = SasPackage(this)
-        prebid = PrebidHandler(applicationContext)
 
         // Load the ads initially
-        //showAds()
+        showAds()
 
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
@@ -39,11 +37,6 @@ class SasActivity : FragmentActivity() {
     }
 
     private fun showAds() {
-        lifecycleScope.launch {
-            val adjAdUnits = prebid.requestAds(adUnits)
-
-            // Request SAS with HB params and render response
-            runBlocking { sasPackage.requestAds(adjAdUnits) }
-        }
+        sasPackage.requestAds(adUnits)
     }
 }

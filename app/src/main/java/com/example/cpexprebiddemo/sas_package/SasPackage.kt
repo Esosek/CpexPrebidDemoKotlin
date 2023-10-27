@@ -8,10 +8,12 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
+import androidx.lifecycle.lifecycleScope
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -19,9 +21,8 @@ import okhttp3.Request
 import java.io.IOException
 import kotlin.random.Random
 
-// Initialize with applicationContext from the Activity.kt
-// It's needed for initializing PrebidHandler
-// Which is used for fetching cached won bids
+// Initialize with context from the SaSActivity.kt
+// It's needed for PrebidHandler
 class SasPackage(private val context: FragmentActivity) {
 
     // SAS configuration
@@ -33,29 +34,32 @@ class SasPackage(private val context: FragmentActivity) {
     private val prebid = PrebidHandler(context)
     private var consentString: String? = null
     private var mid: String? = null
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
 
     // Added to SAS call for cache busting
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
     // Exposed methods to use
-    suspend fun requestAds(adUnits: List<AdUnit>) {
-        consentString = Didomi.getInstance().userStatus.consentString
+    fun requestAds(adUnits: List<AdUnit>) {
+        coroutineScope.launch {
+            consentString = Didomi.getInstance().userStatus.consentString
 
-//        val adjAdUnits =
-//            withContext(CoroutineScope(Dispatchers.IO).coroutineContext) {
-//                prebid.requestAds(adUnits)
-//            }
+            val adjAdUnits = prebid.requestAds(adUnits)
 
-        val deferredResults = adUnits.map { adUnit ->
-            CoroutineScope(Dispatchers.IO).async {
-                val result = requestSingleAd(adUnit)
-                adUnit to result
+            val deferredResults = adjAdUnits.map { adUnit ->
+                CoroutineScope(Dispatchers.IO).async {
+                    val result = withContext(Dispatchers.IO) {
+                        requestSingleAd(adUnit)
+                    }
+                    adUnit to result
+                }
             }
-        }
-        val results = deferredResults.associate { deferred -> deferred.await() }
-        results.forEach { (adUnit, response) ->
-            renderAd(context, adUnit, response)
+
+            val results = deferredResults.associate { deferred -> deferred.await() }
+            results.forEach { (adUnit, response) ->
+                renderAd(context, adUnit, response)
+            }
         }
     }
 
