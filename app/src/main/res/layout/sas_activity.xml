@@ -35,7 +35,7 @@
         <!-- Small Rectangle Ad Container -->
         <FrameLayout
             android:id="@+id/rectangleContainer_1"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_below="@id/smallRectangleTitleTextView"
             android:layout_centerHorizontal="true"
@@ -57,7 +57,7 @@
         <!-- Big Rectangle Ad Container -->
         <FrameLayout
             android:id="@+id/rectangleContainer_2"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_below="@id/bigRectangleTitleTextView"
             android:layout_centerHorizontal="true"
@@ -101,7 +101,7 @@
         <!-- Interscroller Ad Container -->
         <FrameLayout
             android:id="@+id/interscrollerContainer_1"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_below="@id/fillerTextTop"
             android:layout_centerHorizontal="true"

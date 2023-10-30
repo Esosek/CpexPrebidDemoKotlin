@@ -131,7 +131,7 @@ object SasPackage {
 
         // Wraps the HTML creative to control rendered element
         // Resizes the container to reflect format (banner, interscroller)
-        val creative = prepareResizedCreative(response, adUnit, adContainer)
+        val creative = prepareCreative(response, adUnit, adContainer)
 
         val webView = WebView(context)
         adContainer.addView(webView)
@@ -253,61 +253,51 @@ object SasPackage {
         else Log.d(logTag, "No MID found in response")
     }
 
-    private fun prepareResizedCreative(
-        response: String,
-        adUnit: AdUnit,
-        container: FrameLayout
+    private fun prepareCreative(
+        response: String, adUnit: AdUnit, container: FrameLayout
     ): String {
-        val layoutParams = container.layoutParams
         val displayMetrics = context.resources.displayMetrics
         val density = displayMetrics.density
+        val creativeWidth = (adUnit.size[0] * density).roundToInt()
+        var sizeRatio = 1.0f
 
-        // Default creative for banners
-        var creative =
-            """<head><meta name="viewport" content="width=device-width, initial-scale=1"></head>
-               <body style="margin: 0; overflow: hidden; width: ${adUnit.size[0]}px; height: ${adUnit.size[1]}px">
-               $response</body>"""
+        if (creativeWidth > container.width) {
+            sizeRatio = container.width.toFloat() / creativeWidth
+        }
 
-        // Resize interscroller
-        if (adUnit.size[0] == 480 && adUnit.size[1] == 820) {
-            Log.d(logTag, "Caught interscroller")
-            Log.d(logTag, "Display width: ${displayMetrics.widthPixels}")
-            layoutParams.width = displayMetrics.widthPixels
-            layoutParams.height = (displayMetrics.heightPixels * .50).roundToInt()
-            // Calculate needed width for the creative by taking account any padding
-            val viewPadding = displayMetrics.widthPixels - container.width / density
-            val creativeWidth = displayMetrics.widthPixels / density - viewPadding
-            // Wrap the creative to widthFit the device
-            creative = """<head>
-            <style>
-                    body {
-                        margin: 0;
-                        overflow: hidden;
-                        width: ${creativeWidth}px;
-                        height: ${adUnit.size[1]}px;
-                    }
-                        .cpex-interscroller {
-                width: ${creativeWidth}px;
-            }
+        val cssCreativeWidth = (adUnit.size[0] * sizeRatio).roundToInt()
+        val creativeHeight = (adUnit.size[1] * density * sizeRatio).roundToInt()
 
-                .cpex-interscroller img {
-                max-width: 100%;
-                height: auto;
-            }
-            </style>
-            </head>
-            <body>
-            <div class="cpex-interscroller">
+        val styles = """
+        <style>
+          body {
+            margin: 0;
+            overflow: hidden;
+          }
+          .cpex-wrapper {
+            width: ${cssCreativeWidth}px;
+          }
+          .cpex-wrapper img {
+            max-width: 100%;
+            height: auto;
+          }
+        </style>
+    """.trimIndent()
+
+        val creative = """
+        <head>$styles</head>
+        <body>
+          <div class="cpex-wrapper">
             $response
-            </div>
-            </body>"""
-        }
-        // Banner => resize precisely to creative sizes
-        else {
-            layoutParams.width = (adUnit.size[0] * density).toInt()
-            layoutParams.height = (adUnit.size[1] * density).toInt()
-        }
+          </div>
+        </body>
+    """.trimIndent()
+
+        val layoutParams = container.layoutParams
+        layoutParams.width = creativeWidth
+        layoutParams.height = creativeHeight
         container.layoutParams = layoutParams
+        Log.d(logTag, "Creative: $creative")
         return creative
     }
 }
