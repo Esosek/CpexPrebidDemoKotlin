@@ -1,7 +1,7 @@
 package com.cpex.sas_package
 
+import android.app.Activity
 import android.util.Log
-import androidx.fragment.app.FragmentActivity
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,7 +11,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import org.prebid.mobile.Host
 import java.io.IOException
 import kotlin.random.Random
 
@@ -30,7 +29,6 @@ object SasPackage {
     private var isInitialized = false
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var prebid: PrebidHandler
-    private lateinit var context: FragmentActivity
     private var consentString: String? = null
     private var mid: String? = null
     private val random: Int
@@ -38,7 +36,6 @@ object SasPackage {
 
     /**
      * Configures SasPackage, must be called before using other methods
-     * @param context Required for rendering and PrebidSdk initialization
      * @param instanceUrl Base domain of SAS ad server instance
      * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
      * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
@@ -47,15 +44,14 @@ object SasPackage {
      * @param bidderTable (Optional) Translation table for Prebid bidder name to SAS partner name, defaults to "headerbid-app" for bidders that are not explicitly set
      */
     fun initialize(
-        context: FragmentActivity,
+        context: Activity,
         instanceUrl: String,
         enablePrebid: Boolean = false,
-        pbsHost: Host? = null,
+        pbsHost: String? = null,
         pbsAccountId: String? = null,
         pbsTimeoutMs: Int = 1000,
         bidderTable: Map<String, String> = emptyMap()
     ) {
-        SasPackage.context = context
         SasPackage.instanceUrl = instanceUrl
         site = context.packageName
         SasPackage.enablePrebid = enablePrebid
@@ -80,7 +76,7 @@ object SasPackage {
      * - Renders ad creatives
      * @param adUnits List of custom AdUnit data class, Prebid is requested if AdUnit.prebidId is not empty
      */
-    fun requestAds(adUnits: List<AdUnit>) {
+    fun requestAds(context: Activity, adUnits: List<AdUnit>) {
         if (!isInitialized) {
             Log.e(
                 logTag, "SasPackage is NOT initialized, call SasPackage.initialize() first"

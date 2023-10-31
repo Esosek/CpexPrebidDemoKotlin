@@ -27,7 +27,7 @@ import kotlin.coroutines.suspendCoroutine
  */
 class PrebidHandler(
     context: Context,
-    pbsHost: Host,
+    pbsHost: String,
     pbsAccountId: String,
     pbsTimeoutMs: Int,
     bidderTable: Map<String, String>
@@ -42,7 +42,7 @@ class PrebidHandler(
 
     init {
         PrebidMobile.setPrebidServerAccountId(pbsAccountId)
-        PrebidMobile.setPrebidServerHost(pbsHost)
+        PrebidMobile.setPrebidServerHost(Host.createCustomHost(pbsHost))
         PrebidMobile.setTimeoutMillis(pbsTimeoutMs)
         PrebidMobile.initializeSdk(context) { status ->
             if (status != InitializationStatus.SUCCEEDED) {

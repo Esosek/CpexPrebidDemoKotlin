@@ -1,6 +1,7 @@
 package com.cpex.sas_package
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.util.Log
@@ -8,7 +9,6 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import android.widget.ScrollView
-import androidx.fragment.app.FragmentActivity
 import kotlin.math.roundToInt
 
 /**
@@ -25,7 +25,7 @@ object SasRendering {
      * @param adUnit The AdUnit data class containing ad information
      * @param response The HTML creative to be rendered
      */
-    fun renderAd(context: FragmentActivity, adUnit: AdUnit, response: String) {
+    fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
         val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
 
         // Wraps the HTML creative to control rendered element
@@ -45,7 +45,7 @@ object SasRendering {
     /** Creates and configures the WebView, handling ad clicks
      * @return WebView */
     @SuppressLint("SetJavaScriptEnabled")
-    private fun createWebView(context: FragmentActivity): WebView {
+    private fun createWebView(context: Activity): WebView {
         val webView = WebView(context)
         // Configure WebView settings
         webView.settings.javaScriptEnabled = true
@@ -73,7 +73,7 @@ object SasRendering {
      * @param container adContainer<FrameLayout> where creative should be rendered in layout tree
      * @return Finalized HTML creative as String */
     private fun prepareCreative(
-        response: String, adUnit: AdUnit, container: FrameLayout, context: FragmentActivity
+        response: String, adUnit: AdUnit, container: FrameLayout, context: Activity
     ): String {
         val displayMetrics = context.resources.displayMetrics
         val density = displayMetrics.density
@@ -136,7 +136,7 @@ object SasRendering {
      * @param webView WebView in which the ad is rendered
      * @param adContainer adContainer<FrameLayout> in which the WebView is added */
     private fun handleInterscroller(
-        adUnit: AdUnit, webView: WebView, adContainer: FrameLayout, context: FragmentActivity
+        adUnit: AdUnit, webView: WebView, adContainer: FrameLayout, context: Activity
     ) {
         if (adUnit.scrollViewId == null) {
             Log.e(logTag, "SAS Package: Interscroller is missing reference to ScrollView, skipping")

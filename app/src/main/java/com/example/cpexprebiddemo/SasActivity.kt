@@ -3,6 +3,7 @@ package com.example.cpexprebiddemo
 import android.os.Bundle
 import android.widget.Button
 import androidx.fragment.app.FragmentActivity
+import com.cpex.sas_package.AdUnit
 import com.cpex.sas_package.SasPackage
 import org.prebid.mobile.Host
 
@@ -11,19 +12,19 @@ class SasActivity : FragmentActivity() {
         // Ad Units definition
         private val adUnits = listOf(
             // Prebid.org testing banner "prebid-ita-banner-320-50"
-            com.cpex.sas_package.AdUnit(
+            AdUnit(
                 "rectangle-1",
                 listOf(300, 50),
                 R.id.rectangleContainer_1,
                 "10900-imp-rectangle-300-50"
             ),
-            com.cpex.sas_package.AdUnit(
+            AdUnit(
                 "rectangle-2",
                 listOf(300, 250),
                 R.id.rectangleContainer_2,
                 "10900-imp-rectangle-300-250"
             ),
-            com.cpex.sas_package.AdUnit(
+            AdUnit(
                 "interscroller-1",
                 listOf(480, 820),
                 R.id.interscrollerContainer_1,
