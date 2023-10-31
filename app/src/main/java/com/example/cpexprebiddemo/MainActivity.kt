@@ -10,7 +10,6 @@ import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.Spinner
 import androidx.fragment.app.FragmentActivity
-import com.example.cpexprebiddemo.sas_package.ExampleActivity
 import io.didomi.sdk.Didomi
 import io.didomi.sdk.DidomiInitializeParameters
 
@@ -80,7 +79,7 @@ class MainActivity : FragmentActivity() {
                             )
                         )
                         "GAM Rendering API" -> startActivity(Intent(this@MainActivity, GamRenderingActivity::class.java))
-                        "SAS Package" -> startActivity(Intent(this@MainActivity, ExampleActivity::class.java))
+                        "SAS Package" -> startActivity(Intent(this@MainActivity, SasActivity::class.java))
 
                     }
                 }

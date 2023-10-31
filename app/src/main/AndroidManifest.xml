@@ -54,7 +54,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".sas_package.ExampleActivity"
+            android:name=".SasActivity"
             android:exported="true"
             android:theme="@style/Theme.CpexPrebidDemo">
             <intent-filter>
