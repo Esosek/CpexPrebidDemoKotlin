@@ -33,6 +33,7 @@ object SasRendering {
         val creative = prepareCreative(response, adUnit, adContainer, context)
         val webView = createWebView(context)
         adContainer.addView(webView)
+        adUnit.setWebView(webView) // Store reference to AdUnit for clearing purposes
 
         if (adUnit.size[0] == 480 && adUnit.size[1] == 820) {
             handleInterscroller(adUnit, webView, adContainer, context)

@@ -1,5 +1,8 @@
 package com.example.cpexprebiddemo.sas_package
 
+import android.webkit.WebView
+import android.widget.FrameLayout
+
 data class AdUnit(
     /** Custom label */
     val name: String,
@@ -16,7 +19,23 @@ data class AdUnit(
     /** Extra targeting information that should be passed to ad sever */
     var targeting: Map<String, String> = emptyMap()
         private set
+    private var webView: WebView? = null
     fun setTargeting(targeting: Map<String, String>) {
         this.targeting = targeting
+    }
+
+    // Store reference to assigned WebView for clearing
+    fun setWebView(webView: WebView) {
+        this.webView = webView
+    }
+    fun clearWebView() {
+        if(webView == null) {
+            return
+        }
+        val parent = webView!!.parent as? FrameLayout
+        parent?.removeView(webView)
+        webView!!.clearCache(true)
+        webView!!.clearHistory()
+        webView!!.destroy()
     }
 }

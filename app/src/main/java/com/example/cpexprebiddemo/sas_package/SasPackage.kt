@@ -110,6 +110,15 @@ object SasPackage {
         }
     }
 
+    /** Clear created WebViews from memory, should be called when refreshing ads
+     * or navigating to other Activity
+     * @param adUnits List of active AdUnit in current Activity */
+    fun clearAdUnits(adUnits: List<AdUnit>) {
+        adUnits.forEach { adUnit ->
+           adUnit.clearWebView()
+        }
+    }
+
     /**
      * Requests a single ad unit from the SAS server based on the given AdUnit.
      *

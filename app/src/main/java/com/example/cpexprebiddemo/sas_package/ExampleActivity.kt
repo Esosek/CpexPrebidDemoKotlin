@@ -11,9 +11,24 @@ class ExampleActivity : FragmentActivity() {
         // Ad Units definition
         private val adUnits = listOf(
             // Prebid.org testing banner "prebid-ita-banner-320-50"
-            AdUnit("rectangle-1", listOf(300, 50), R.id.rectangleContainer_1, "10900-imp-rectangle-300-50"),
-            AdUnit("rectangle-2", listOf(300, 250), R.id.rectangleContainer_2, "10900-imp-rectangle-300-250"),
-            AdUnit("interscroller-1", listOf(480, 820), R.id.interscrollerContainer_1, scrollViewId = R.id.scrollView)
+            AdUnit(
+                "rectangle-1",
+                listOf(300, 50),
+                R.id.rectangleContainer_1,
+                "10900-imp-rectangle-300-50"
+            ),
+            AdUnit(
+                "rectangle-2",
+                listOf(300, 250),
+                R.id.rectangleContainer_2,
+                "10900-imp-rectangle-300-250"
+            ),
+            AdUnit(
+                "interscroller-1",
+                listOf(480, 820),
+                R.id.interscrollerContainer_1,
+                scrollViewId = R.id.scrollView
+            )
         )
     }
 
@@ -29,6 +44,7 @@ class ExampleActivity : FragmentActivity() {
             pbsAccountId = "10900-mobilewrapper-0",
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
+                // bidders ...
             )
         )
 
@@ -49,7 +65,13 @@ class ExampleActivity : FragmentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        SasPackage.clearAdUnits(adUnits)
+    }
+
     private fun showAds() {
+        SasPackage.clearAdUnits(adUnits) // Clear past ads and their WebViews
         SasPackage.requestAds(adUnits)
     }
 }
