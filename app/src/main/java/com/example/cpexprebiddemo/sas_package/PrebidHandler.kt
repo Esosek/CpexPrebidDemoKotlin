@@ -102,8 +102,8 @@ class PrebidHandler(
         }
 
         // Start fetching demand for each ad unit
-        for (adUnits in adUnits) {
-            handleAdUnit(adUnits)
+        for (adUnit in adUnits) {
+            handleAdUnit(adUnit)
         }
     }
 
