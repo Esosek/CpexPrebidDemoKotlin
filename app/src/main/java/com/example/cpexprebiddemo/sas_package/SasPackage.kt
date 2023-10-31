@@ -1,13 +1,6 @@
 package com.example.cpexprebiddemo.sas_package
 
-import android.annotation.SuppressLint
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.util.Log
-import android.webkit.WebView
-import android.webkit.WebViewClient
-import android.widget.FrameLayout
 import androidx.fragment.app.FragmentActivity
 import io.didomi.sdk.Didomi
 import kotlinx.coroutines.CoroutineScope
@@ -20,15 +13,14 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.prebid.mobile.Host
 import java.io.IOException
-import kotlin.math.roundToInt
 import kotlin.random.Random
+
 
 /**
  * A singleton object representing the SasPackage responsible for showing ads.
  * Including option to incorporate Prebid.
  */
 object SasPackage {
-
     // Configuration
     private lateinit var instanceUrl: String
     private lateinit var site: String
@@ -113,48 +105,9 @@ object SasPackage {
 
             val results = deferredResults.associate { deferred -> deferred.await() }
             results.forEach { (adUnit, response) ->
-                renderAd(context, adUnit, response)
+                SasRendering.renderAd(context, adUnit, response)
             }
         }
-    }
-
-    /**
-     * Function to render an ad in a specified WebView container.
-     *
-     * @param context The activity where the ad should be rendered
-     * @param adUnit The AdUnit data class containing ad information
-     * @param response The HTML creative to be rendered
-     */
-    @SuppressLint("SetJavaScriptEnabled")
-    private fun renderAd(context: Activity, adUnit: AdUnit, response: String) {
-        val adContainer = context.findViewById<FrameLayout>(adUnit.layoutContainerId)
-
-        // Wraps the HTML creative to control rendered element
-        // Resizes the container to reflect format (banner, interscroller)
-        val creative = prepareCreative(response, adUnit, adContainer)
-
-        val webView = WebView(context)
-        adContainer.addView(webView)
-
-        // Configure WebView settings
-        webView.settings.javaScriptEnabled = true
-        // Disable scrollbars
-        webView.isVerticalScrollBarEnabled = false
-        webView.isHorizontalScrollBarEnabled = false
-
-        webView.webViewClient = object : WebViewClient() {
-            // By default click url is opened inside WebView
-            // Force opening browser instead
-            @Deprecated("Deprecated in Java")
-            override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
-                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                view?.context?.startActivity(intent)
-                return true
-            }
-        }
-
-        // Load the HTML content into the WebView
-        webView.loadData(creative, "text/html", "UTF-8")
     }
 
     /**
@@ -251,53 +204,5 @@ object SasPackage {
 
         if (mid != null) Log.d(logTag, "MID $mid stored")
         else Log.d(logTag, "No MID found in response")
-    }
-
-    private fun prepareCreative(
-        response: String, adUnit: AdUnit, container: FrameLayout
-    ): String {
-        val displayMetrics = context.resources.displayMetrics
-        val density = displayMetrics.density
-        val creativeWidth = (adUnit.size[0] * density).roundToInt()
-        var sizeRatio = 1.0f
-
-        if (creativeWidth > container.width) {
-            sizeRatio = container.width.toFloat() / creativeWidth
-        }
-
-        val cssCreativeWidth = (adUnit.size[0] * sizeRatio).roundToInt()
-        val creativeHeight = (adUnit.size[1] * density * sizeRatio).roundToInt()
-
-        val styles = """
-        <style>
-          body {
-            margin: 0;
-            overflow: hidden;
-          }
-          .cpex-wrapper {
-            width: ${cssCreativeWidth}px;
-          }
-          .cpex-wrapper img {
-            max-width: 100%;
-            height: auto;
-          }
-        </style>
-    """.trimIndent()
-
-        val creative = """
-        <head>$styles</head>
-        <body>
-          <div class="cpex-wrapper">
-            $response
-          </div>
-        </body>
-    """.trimIndent()
-
-        val layoutParams = container.layoutParams
-        layoutParams.width = creativeWidth
-        layoutParams.height = creativeHeight
-        container.layoutParams = layoutParams
-        Log.d(logTag, "Creative: $creative")
-        return creative
     }
 }

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/scrollView"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -106,7 +107,7 @@
             android:layout_below="@id/fillerTextTop"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
-            android:background="@android:color/darker_gray" />
+            android:background="@android:color/transparent" />
 
         <!-- Filler Text -->
         <TextView
@@ -124,7 +125,7 @@
         <TextView
             android:id="@+id/fillerTextBottom2"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="600dp"
             android:layout_below="@id/fillerTextBottom"
             android:layout_centerHorizontal="true"
             android:layout_marginTop="16dp"
