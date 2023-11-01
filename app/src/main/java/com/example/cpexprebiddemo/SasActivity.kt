@@ -17,12 +17,12 @@ class SasActivity : FragmentActivity() {
                 R.id.rectangleContainer_1,
                 "10900-imp-rectangle-300-50"
             ),
-//            AdUnit(
-//                "rectangle-2",
-//                listOf(300, 250),
-//                R.id.rectangleContainer_2,
-//                "10900-imp-rectangle-300-250"
-//            ),
+            AdUnit(
+                "rectangle-2",
+                listOf(300, 250),
+                R.id.rectangleContainer_2,
+                "10900-imp-rectangle-300-250"
+            ),
             AdUnit(
                 "interscroller-1",
                 listOf(480, 820),
