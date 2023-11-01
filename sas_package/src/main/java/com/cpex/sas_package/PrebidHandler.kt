@@ -84,8 +84,7 @@ class PrebidHandler(
                         Log.d(logTag, "${adUnit.name} keywords: $keywords")
                         val targeting = mapOf(
                             // Keys starting with _ won't be sent to SAS
-                            // "hbid" to keywords["hb_pb"].toString()
-                            "hbid" to "0.2",
+                            "hbid" to keywords["hb_pb"].toString(),
                             "hbid_v" to translatedBidder(keywords["hb_bidder"].toString()),
                             "hb_cache" to keywords["hb_cache_id"].toString(),
                             "_hb_cache_host" to keywords["hb_cache_host"].toString()

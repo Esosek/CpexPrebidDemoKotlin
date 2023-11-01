@@ -5,7 +5,6 @@ import android.widget.Button
 import androidx.fragment.app.FragmentActivity
 import com.cpex.sas_package.AdUnit
 import com.cpex.sas_package.SasPackage
-import org.prebid.mobile.Host
 
 class SasActivity : FragmentActivity() {
     companion object {
@@ -18,12 +17,12 @@ class SasActivity : FragmentActivity() {
                 R.id.rectangleContainer_1,
                 "10900-imp-rectangle-300-50"
             ),
-            AdUnit(
-                "rectangle-2",
-                listOf(300, 250),
-                R.id.rectangleContainer_2,
-                "10900-imp-rectangle-300-250"
-            ),
+//            AdUnit(
+//                "rectangle-2",
+//                listOf(300, 250),
+//                R.id.rectangleContainer_2,
+//                "10900-imp-rectangle-300-250"
+//            ),
             AdUnit(
                 "interscroller-1",
                 listOf(480, 820),
@@ -41,8 +40,8 @@ class SasActivity : FragmentActivity() {
             context = this,
             instanceUrl = "https://optimics-ads.aimatch.com/optimics",
             enablePrebid = true,
-            pbsHost = Host.RUBICON,
-            pbsAccountId = "10900-mobilewrapper-0",
+            pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
+            pbsAccountId = "10900-cpex-saswrapper-1",
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
                 // bidders ...
@@ -73,6 +72,6 @@ class SasActivity : FragmentActivity() {
 
     private fun showAds() {
         SasPackage.clearAdUnits(adUnits) // Clear past ads and their WebViews
-        SasPackage.requestAds(adUnits)
+        SasPackage.requestAds(this, adUnits)
     }
 }

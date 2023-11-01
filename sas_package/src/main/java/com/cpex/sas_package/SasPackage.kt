@@ -20,6 +20,7 @@ import kotlin.random.Random
  * Including option to incorporate Prebid.
  */
 object SasPackage {
+    private const val version = "1.0.0"
     // Configuration
     private lateinit var instanceUrl: String
     private lateinit var site: String
@@ -65,7 +66,7 @@ object SasPackage {
             }
         }
         isInitialized = true
-        Log.d(logTag, "SasPackage initialized successfully")
+        Log.d(logTag, "SasPackage v$version initialized successfully")
     }
 
     /**
