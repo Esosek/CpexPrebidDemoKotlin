@@ -14,14 +14,13 @@ import org.prebid.mobile.api.rendering.BannerView
 import com.google.android.gms.ads.MobileAds
 import org.prebid.mobile.eventhandlers.GamBannerEventHandler
 
-data class AdUnit(
-    val pbsConfigId: String, // Stored Request ID in PBS example: '10900-imp-rectangle-300-50'
-    val gamAdUnitId: String, // GAM AdUnit path example: '/22631723832/com.example.cpexprebiddemo_small_rectangle'
-    val adSize: AdSize, // Requested size example: AdSize(300,50)
-    val layoutContainerId: Int // ID of <FrameLayout> example: R.id.smallRectangleContainer
-)
-
 class GamRenderingActivity : FragmentActivity() {
+    data class AdUnit(
+        val pbsConfigId: String, // Stored Request ID in PBS example: '10900-imp-rectangle-300-50'
+        val gamAdUnitId: String, // GAM AdUnit path example: '/22631723832/com.example.cpexprebiddemo_small_rectangle'
+        val adSize: AdSize, // Requested size example: AdSize(300,50)
+        val layoutContainerId: Int // ID of <FrameLayout> example: R.id.smallRectangleContainer
+    )
     companion object {
         // Magnite server config
         val PBS_HOST = Host.RUBICON
@@ -30,8 +29,8 @@ class GamRenderingActivity : FragmentActivity() {
 
         // Ad Units definition
         private val adUnits = mapOf(
-            "smallRectangle" to AdUnit("10900-imp-rectangle-300-50", "/22794528025/PrebidDemoAndroid_rectangle_1", AdSize(300,50), R.id.smallRectangleContainer),
-            "bigRectangle" to AdUnit("10900-imp-rectangle-300-250", "/22794528025/PrebidDemoAndroid_rectangle_2", AdSize(300,250), R.id.bigRectangleContainer)
+            "smallRectangle" to AdUnit("10900-imp-rectangle-300-50", "/22794528025/PrebidDemoAndroid_rectangle_1", AdSize(300,50), R.id.rectangleContainer_1),
+            "bigRectangle" to AdUnit("10900-imp-rectangle-300-250", "/22794528025/PrebidDemoAndroid_rectangle_2", AdSize(300,250), R.id.rectangleContainer_2)
         )
     }
 
@@ -45,6 +44,7 @@ class GamRenderingActivity : FragmentActivity() {
         // Load the ads initially
         adUnits["smallRectangle"]?.loadAd()
         adUnits["bigRectangle"]?.loadAd()
+
 
         // Set the "Refresh" button
         val refreshButton = findViewById<Button>(R.id.refreshButton)
