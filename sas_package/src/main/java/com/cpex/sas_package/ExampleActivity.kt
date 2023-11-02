@@ -42,7 +42,8 @@ class ExampleActivity : FragmentActivity() {
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
                 // other bidders ...
-            )
+            ),
+            interscrollerHeight = .5
         )
 
         // Load the ads initially

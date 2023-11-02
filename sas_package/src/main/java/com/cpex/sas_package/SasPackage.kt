@@ -34,6 +34,8 @@ object SasPackage {
     private var consentString: String? = null
     private var cmpVendorId: String? = null
     private var mid: String? = null
+    var interscrollerHeight: Double = .75
+        private set
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
@@ -47,6 +49,7 @@ object SasPackage {
      * @param pbsTimeoutMs (Optional) Time in milliseconds to wait for Prebid Server response, defaults to 1000ms
      * @param cmpVendorId (Optional) Publisher's Didomi ID for storing MID in localStorage, MID won't be stored if consent disabled or ID is missing
      * @param bidderTable (Optional) Translation table for Prebid bidder name to SAS partner name, defaults to "headerbid-app" for bidders that are not explicitly set
+     * @param interscrollerHeight (Optional) Between 0 and 1, where 1 means the interscroller will be display at 100% height of the View, defaults to 0.5
      */
     fun initialize(
         context: Activity,
@@ -56,12 +59,14 @@ object SasPackage {
         pbsAccountId: String? = null,
         pbsTimeoutMs: Int = 1000,
         cmpVendorId: String? = null,
-        bidderTable: Map<String, String> = emptyMap()
+        bidderTable: Map<String, String> = emptyMap(),
+        interscrollerHeight: Double = .75
     ) {
         this.instanceUrl = instanceUrl
         site = context.packageName
         this.enablePrebid = enablePrebid
         this.cmpVendorId = cmpVendorId
+        this.interscrollerHeight = interscrollerHeight
 
         // Initialize Prebid if enabled
         if (enablePrebid) {

@@ -19,6 +19,7 @@ data class AdUnit(
     /** Extra targeting information that should be passed to ad sever */
     var targeting: Map<String, String> = emptyMap()
         private set
+    /** WebView associated with ad from this AdUnit */
     private var webView: WebView? = null
     fun setTargeting(targeting: Map<String, String>) {
         this.targeting = targeting

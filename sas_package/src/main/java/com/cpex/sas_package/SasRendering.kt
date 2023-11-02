@@ -66,8 +66,8 @@ object SasRendering {
         return webView
     }
 
-    /** Wraps the HTML for basic styling and resizes adContainer to fitWidth
-     * - Sets interscroller to 50 % of the View
+    /** Wraps the HTML response with basic styling and resizes adContainer to fitWidth
+     * - Sets interscroller View %, defaults to 50 %
      * @param response raw HTML creative from ad server
      * @param adUnit AdUnit used for creative size and format detection
      * @param container adContainer<FrameLayout> where creative should be rendered in layout tree
@@ -110,7 +110,7 @@ object SasRendering {
 
         if (adUnit.size[0] == 480 && adUnit.size[1] == 820) {
             Log.d(logTag, "Caught interscroller")
-            creativeHeight = (displayMetrics.heightPixels * .5).roundToInt()
+            creativeHeight = (displayMetrics.heightPixels * SasPackage.interscrollerHeight).roundToInt()
         }
 
         val layoutParams = container.layoutParams

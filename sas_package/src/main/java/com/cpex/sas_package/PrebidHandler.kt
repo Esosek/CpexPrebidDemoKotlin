@@ -131,6 +131,13 @@ class PrebidHandler(
         }
     }
 
+    /**
+     * Sends a GET request to the specified URL and returns the response as a string.
+     *
+     * @param url The URL to send the GET request to.
+     * @return The response from the server as a string.
+     * @throws IOException if the GET request is unsuccessful.
+     */
     private fun sendGetRequest(url: String): String {
         val client = OkHttpClient()
         val request = Request.Builder()
