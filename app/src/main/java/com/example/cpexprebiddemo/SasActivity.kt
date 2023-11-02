@@ -67,8 +67,8 @@ class SasActivity : FragmentActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         SasPackage.clearAdUnits(adUnits)
+        super.onDestroy()
     }
 
     private fun showAds() {

@@ -37,5 +37,6 @@ data class AdUnit(
         webView!!.clearCache(true)
         webView!!.clearHistory()
         webView!!.destroy()
+        webView = null
     }
 }
