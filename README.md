@@ -22,8 +22,8 @@ Standalone SAS module with optional Prebid integration. Requires Didomi SDK (CMP
 ### Implementation
 
 1. Download module from [this page](https://git.cpex.cz/frontend/cpex-android-package/-/tree/master/sas_package).
-2. Import the module Android project File > New > Import Module to project root level (same level as app folder)
-3. In app-level build.grade add the module as a dependency
+2. Import the module to Android Studio project **File > New > Import Module** to project root level (same level as app folder)
+3. In app-level **build.gradle** add the module as a dependency
 
 ```kotlin
 dependencies {
@@ -32,9 +32,9 @@ dependencies {
     }
 ```
 
-4. Initialize SasPackage object in the first app Activity. Since SasPackage tries to initialize Didomi SDK, that activity has to be of type FragmentActivity. You may also initialize Didomi SDK yourself see Didomi [docs](https://developers.didomi.io/cmp/mobile-sdk/android/setup). Be sure to call `Didomi.getInstance().setupUI(this)` to display CMP UI if it's needed.
+4. Initialize SasPackage object in the first app Activity. Since SasPackage tries to initialize Didomi SDK, that activity has to be of type **FragmentActivity**. You may also initialize Didomi SDK yourself, see [Didomi docs](https://developers.didomi.io/cmp/mobile-sdk/android/setup). Be sure to call `Didomi.getInstance().setupUI(this)` to display CMP UI if it's needed.
 
-Example of configuration
+**Example of configuration**
 
 ```kotlin
 import com.cpex.sas_package.SasPackage
@@ -66,7 +66,7 @@ class ExampleActivity : FragmentActivity() {
     import com.cpex.sas_package.AdUnit
     import com.cpex.sas_package.SasPackage
     ```
-    - create FrameLayout per ad unit in XML layout file
+    - create **FrameLayout** per ad unit in XML layout file
     ```kotlin
     <!-- Ad Container -->
     <FrameLayout
@@ -75,7 +75,7 @@ class ExampleActivity : FragmentActivity() {
         android:layout_height="0dp"
         android:layout_centerHorizontal="true"/>
     ```
-    - define List\<AdUnit>
+    - define **List\<AdUnit>**
     ``` kotlin
     private val adUnits = listOf(
         AdUnit(
