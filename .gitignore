@@ -1,0 +1,37 @@
+# Gradle files and directories
+.gradle/
+build/
+.gradle.kts
+.gradle-wrapper/
+
+# Local configuration files
+local.properties
+
+# Android Studio
+/.idea/
+/captures/
+/navigation.json
+/lint/
+
+# User-specific files
+.DS_Store
+*.iml
+*.log
+/captures/
+/.externalNativeBuild/
+/.cxx/
+
+# Generated files
+build/outputs/
+
+# Local configuration file
+local.properties
+
+# Signing files
+.keystore
+
+# Crashlytics generated file
+crashlytics-build.properties
+
+# Android Profiles
+google-services.json
