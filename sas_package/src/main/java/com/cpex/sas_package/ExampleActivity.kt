@@ -3,6 +3,7 @@ package com.cpex.sas_package
 import android.os.Bundle
 import android.widget.Button
 import androidx.fragment.app.FragmentActivity
+import io.didomi.sdk.Didomi
 
 class ExampleActivity : FragmentActivity() {
     companion object {
@@ -45,6 +46,8 @@ class ExampleActivity : FragmentActivity() {
             ),
             interscrollerHeight = .75
         )
+        // Show CMP if needed
+        Didomi.getInstance().setupUI(this)
 
         // Load the ads initially
         showAds()

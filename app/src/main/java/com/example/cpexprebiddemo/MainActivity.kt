@@ -36,8 +36,12 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun initDidomiSDK() {
+        Log.d(TAG, "Didomi: Initializing SDK")
+        if(Didomi.getInstance().isInitialized) {
+            Log.d(TAG, "Didomi: SDK was already initialized, skipping")
+            return
+        }
         try {
-            Log.d(TAG, "Didomi: Initializing SDK")
             Didomi.getInstance().initialize(
                 this.application,
                 DidomiInitializeParameters(apiKey = "9a8e2159-3781-4da1-9590-fbf86806f86e")

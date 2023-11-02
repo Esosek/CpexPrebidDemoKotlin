@@ -5,6 +5,7 @@ import android.widget.Button
 import androidx.fragment.app.FragmentActivity
 import com.cpex.sas_package.AdUnit
 import com.cpex.sas_package.SasPackage
+import io.didomi.sdk.Didomi
 
 class SasActivity : FragmentActivity() {
     companion object {
@@ -56,6 +57,9 @@ class SasActivity : FragmentActivity() {
 //            pbsHost = Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction"),
 //            pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d",
 //        )
+
+        // Show CMP if needed
+        Didomi.getInstance().setupUI(this)
 
         // Load the ads initially
         showAds()

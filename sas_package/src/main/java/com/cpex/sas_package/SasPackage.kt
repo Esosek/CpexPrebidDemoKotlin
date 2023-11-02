@@ -1,8 +1,10 @@
 package com.cpex.sas_package
 
 import android.app.Activity
+import android.content.ContentValues
 import android.util.Log
 import io.didomi.sdk.Didomi
+import io.didomi.sdk.DidomiInitializeParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -17,6 +19,7 @@ import kotlin.random.Random
 
 /**
  * A singleton object representing the SasPackage responsible for showing ads and tracking users in SAS.
+ * Requires Didomi SDK to work, it's initialized alongside SasPackage.
  * Including option to incorporate Prebid.
  */
 object SasPackage {
@@ -40,8 +43,8 @@ object SasPackage {
         get() = (Random.nextDouble() * 100000000).toInt()
 
     /**
-     * Configures SasPackage, must be called before using other methods
-     * @param context Current activity context
+     * Configures SasPackage, must be called before using other methods. Initializes Didomi SDK.
+     * @param context Current activity context. Required primarily for Prebid and Didomi SDK initialization.
      * @param instanceUrl Base domain of SAS ad server instance
      * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
      * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
@@ -68,6 +71,9 @@ object SasPackage {
         this.cmpVendorId = cmpVendorId
         this.interscrollerHeight = interscrollerHeight
 
+        // Initialize Didomi CMP
+        initDidomiSDK(context)
+
         // Initialize Prebid if enabled
         if (enablePrebid) {
             if (pbsHost == null || pbsAccountId == null) {
@@ -77,7 +83,7 @@ object SasPackage {
             }
         }
         isInitialized = true
-        Log.d(logTag, "SasPackage v$version initialized successfully")
+        Log.d(logTag, "SasPackage $version initialized successfully")
     }
 
     /**
@@ -124,6 +130,34 @@ object SasPackage {
     fun clearAdUnits(adUnits: List<AdUnit>) {
         adUnits.forEach { adUnit ->
             adUnit.clearWebView()
+        }
+    }
+
+    /** Initializes Didomi SDK with CPEx account during SasPackage initialization.
+     * CMP UI must be requested from FragmentActivity.
+     * @param context Current app Activity context */
+    private fun initDidomiSDK(context: Activity) {
+        Log.d(ContentValues.TAG, "Didomi: Initializing SDK")
+        if(Didomi.getInstance().isInitialized) {
+            Log.d(ContentValues.TAG, "Didomi: SDK was already initialized, skipping")
+            return
+        }
+        try {
+            Didomi.getInstance().initialize(
+                context.application,
+                DidomiInitializeParameters(apiKey = "9a8e2159-3781-4da1-9590-fbf86806f86e")
+            )
+
+            // Do not use the Didomi.getInstance() object here for anything else than registering your ready listener
+            // The SDK might not be ready yet
+
+            Didomi.getInstance().onReady {
+                // The SDK is ready, you can now interact with it
+                Log.d(ContentValues.TAG, "Didomi: SDK initialized successfully!")
+                Log.d(ContentValues.TAG, "ConsentString=" + Didomi.getInstance().userStatus.consentString)
+            }
+        } catch (e: Exception) {
+            Log.e(ContentValues.TAG, "Error while initializing the Didomi SDK", e)
         }
     }
 
