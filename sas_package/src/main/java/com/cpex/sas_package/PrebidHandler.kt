@@ -89,7 +89,6 @@ class PrebidHandler(
                             "hb_cache" to keywords["hb_cache_id"].toString(),
                             "_hb_cache_host" to keywords["hb_cache_host"].toString()
                         )
-                        Log.d(logTag, "${adUnit.name}: setting targeting to $targeting")
                         adUnit.setTargeting(targeting) // Set targeting for the AdUnit
                     } else {
                         Log.d(logTag, "Prebid: No bid returned for ${adUnit.name}")

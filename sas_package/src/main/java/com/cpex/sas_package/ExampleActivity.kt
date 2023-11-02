@@ -43,7 +43,7 @@ class ExampleActivity : FragmentActivity() {
                 "rubicon" to "magnite_hb_app"
                 // other bidders ...
             ),
-            interscrollerHeight = .5
+            interscrollerHeight = .75
         )
 
         // Load the ads initially

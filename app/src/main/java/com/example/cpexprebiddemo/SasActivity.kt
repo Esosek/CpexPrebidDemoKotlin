@@ -47,7 +47,7 @@ class SasActivity : FragmentActivity() {
                 "rubicon" to "magnite_hb_app"
                 // bidders ...
             ),
-            interscrollerHeight = .5
+            interscrollerHeight = .75
         )
 
 // Prebid.org testing Prebid server config

@@ -109,7 +109,7 @@ object SasRendering {
     """.trimIndent()
 
         if (adUnit.size[0] == 480 && adUnit.size[1] == 820) {
-            Log.d(logTag, "Caught interscroller")
+            Log.d(logTag, "Rendering interscroller in ${adUnit.name}")
             creativeHeight = (displayMetrics.heightPixels * SasPackage.interscrollerHeight).roundToInt()
         }
 

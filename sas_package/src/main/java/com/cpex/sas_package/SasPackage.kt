@@ -34,7 +34,7 @@ object SasPackage {
     private var consentString: String? = null
     private var cmpVendorId: String? = null
     private var mid: String? = null
-    var interscrollerHeight: Double = .75
+    var interscrollerHeight: Double = 0.0
         private set
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
@@ -60,7 +60,7 @@ object SasPackage {
         pbsTimeoutMs: Int = 1000,
         cmpVendorId: String? = null,
         bidderTable: Map<String, String> = emptyMap(),
-        interscrollerHeight: Double = .75
+        interscrollerHeight: Double = .5
     ) {
         this.instanceUrl = instanceUrl
         site = context.packageName
