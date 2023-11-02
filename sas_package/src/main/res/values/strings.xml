@@ -1,8 +1,0 @@
-<resources>
-    <string name="sas_package">SAS Package</string>
-    <string name="banner_300x50">Rectangle-1</string>
-    <string name="banner_300x250">Rectangle-2</string>
-    <string name="refresh_ads">Refresh Ads</string>
-    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Duis sapien nunc, commodo et, interdum suscipit, sollicitudin et, dolor. Vivamus porttitor turpis ac leo. Praesent in mauris eu tortor porttitor accumsan. In rutrum. Sed convallis magna eu sem. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Mauris tincidunt sem sed arcu. Aliquam erat volutpat. Mauris tincidunt sem sed arcu. Quisque porta. Nulla turpis magna, cursus sit amet, suscipit a, interdum id, felis. Praesent in mauris eu tortor porttitor accumsan. Nulla non lectus sed nisl molestie malesuada.</string>
-    <string name="interscroller_1">Interscroller-1</string>
-</resources>
