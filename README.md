@@ -1,12 +1,9 @@
 # CpexPrebidDemoKotlin
 
-This is a demo app showcasing the integration of Prebid Mobile for Android platform
-
-## Preview
-
-<img src="demo_preview.gif" alt="Demo Preview" width="250">
+Demo app showcasing the integration of Prebid Mobile for Android platform
 
 ## Integrations
 
+- Custom SAS
 - No ad server
 - GAM Rendering API
