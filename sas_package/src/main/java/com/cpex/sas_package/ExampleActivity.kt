@@ -10,10 +10,10 @@ class ExampleActivity : FragmentActivity() {
         // Ad Units definition
         private val adUnits = listOf(
             AdUnit(
-                "rectangle-1",
-                listOf(300, 50),
-                R.id.rectangleContainer_1,
-                "10900-imp-rectangle-300-50"
+                name = "rectangle-1",
+                size = listOf(300, 50),
+                layoutContainerId = R.id.rectangleContainer_1,
+                prebidId = "10900-imp-rectangle-300-50"
             ),
             AdUnit(
                 "rectangle-2",
@@ -39,7 +39,8 @@ class ExampleActivity : FragmentActivity() {
             instanceUrl = "https://optimics-ads.aimatch.com/optimics",
             enablePrebid = true,
             pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
-            pbsAccountId = "10900-mobilewrapper-0",
+            pbsAccountId = "10900-cpex-saswrapper-1",
+            cmpVendorId = "570",
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
                 // other bidders ...
