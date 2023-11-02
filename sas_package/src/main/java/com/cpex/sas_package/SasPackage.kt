@@ -16,11 +16,12 @@ import kotlin.random.Random
 
 
 /**
- * A singleton object representing the SasPackage responsible for showing ads.
+ * A singleton object representing the SasPackage responsible for showing ads and tracking users in SAS.
  * Including option to incorporate Prebid.
  */
 object SasPackage {
     private const val version = "1.0.0"
+
     // Configuration
     private lateinit var instanceUrl: String
     private lateinit var site: String
@@ -31,17 +32,20 @@ object SasPackage {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var prebid: PrebidHandler
     private var consentString: String? = null
+    private var cmpVendorId: String? = null
     private var mid: String? = null
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
 
     /**
      * Configures SasPackage, must be called before using other methods
+     * @param context Current activity context
      * @param instanceUrl Base domain of SAS ad server instance
      * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
      * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
      * @param pbsAccountId (Required if Prebid enabled) ID of the wrapper stored on Prebid Server
      * @param pbsTimeoutMs (Optional) Time in milliseconds to wait for Prebid Server response, defaults to 1000ms
+     * @param cmpVendorId (Optional) Publisher's Didomi ID for storing MID in localStorage, MID won't be stored if consent disabled or ID is missing
      * @param bidderTable (Optional) Translation table for Prebid bidder name to SAS partner name, defaults to "headerbid-app" for bidders that are not explicitly set
      */
     fun initialize(
@@ -51,11 +55,13 @@ object SasPackage {
         pbsHost: String? = null,
         pbsAccountId: String? = null,
         pbsTimeoutMs: Int = 1000,
+        cmpVendorId: String? = null,
         bidderTable: Map<String, String> = emptyMap()
     ) {
-        SasPackage.instanceUrl = instanceUrl
+        this.instanceUrl = instanceUrl
         site = context.packageName
-        SasPackage.enablePrebid = enablePrebid
+        this.enablePrebid = enablePrebid
+        this.cmpVendorId = cmpVendorId
 
         // Initialize Prebid if enabled
         if (enablePrebid) {
@@ -112,7 +118,7 @@ object SasPackage {
      * @param adUnits List of active AdUnit in current Activity */
     fun clearAdUnits(adUnits: List<AdUnit>) {
         adUnits.forEach { adUnit ->
-           adUnit.clearWebView()
+            adUnit.clearWebView()
         }
     }
 
@@ -147,11 +153,11 @@ object SasPackage {
             )
 
             val reqUrl = parameters.joinToString("/")
-            Log.d(logTag, "SAS request: $reqUrl")
+            Log.d(logTag, "SAS request for ${adUnit.name}: $reqUrl")
 
             try {
                 val res = sendGetRequest(reqUrl)
-                Log.d(logTag, "SAS response: $res")
+                Log.d(logTag, "SAS response for ${adUnit.name}: $res")
                 val creative = fetchPrebidCreative(res, adUnit.targeting["_hb_cache_host"] ?: "")
                 creative
             } catch (e: Exception) {
@@ -198,17 +204,23 @@ object SasPackage {
     }
 
     /**
-     * Extracts the MID (SAS user ID) from the SAS response headers, if available.
+     * Extracts the MID (SAS user ID) from the SAS response headers, if available and defined vendor is enabled.
      *
      * @param resHeaders The response headers from the SAS server.
      */
     private fun getMidFromResponse(resHeaders: String) {
         Log.d(logTag, "Trying to get MID from SAS response")
-        val regex = Regex("""mid=(\d+);""")
-        val matchResult = regex.find(resHeaders)
-        mid = matchResult?.groups?.get(1)?.value
+        // Check if vendor enabled
+        if (Didomi.getInstance().userStatus.vendors.global.enabled.contains(cmpVendorId)) {
+            val regex = Regex("""mid=(\d+);""")
+            val matchResult = regex.find(resHeaders)
+            mid = matchResult?.groups?.get(1)?.value
 
-        if (mid != null) Log.d(logTag, "MID $mid stored")
-        else Log.d(logTag, "No MID found in response")
+            if (mid != null) Log.d(logTag, "MID $mid stored")
+            else Log.d(logTag, "No MID found in response")
+        }
+        else {
+            Log.d(logTag, "Vendor disable, MID is NOT stored.")
+        }
     }
 }

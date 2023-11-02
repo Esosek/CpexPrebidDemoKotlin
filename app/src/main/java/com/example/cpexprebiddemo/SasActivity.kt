@@ -42,6 +42,7 @@ class SasActivity : FragmentActivity() {
             enablePrebid = true,
             pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
             pbsAccountId = "10900-cpex-saswrapper-1",
+            cmpVendorId = "570",
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
                 // bidders ...

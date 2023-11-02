@@ -8,7 +8,6 @@ class ExampleActivity : FragmentActivity() {
     companion object {
         // Ad Units definition
         private val adUnits = listOf(
-            // Prebid.org testing banner "prebid-ita-banner-320-50"
             AdUnit(
                 "rectangle-1",
                 listOf(300, 50),
@@ -42,16 +41,9 @@ class ExampleActivity : FragmentActivity() {
             pbsAccountId = "10900-mobilewrapper-0",
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
-                // bidders ...
+                // other bidders ...
             )
         )
-
-// Prebid.org testing Prebid server config
-//        SasPackage.initialize(
-//            ...
-//            pbsHost = Host.createCustomHost("https://prebid-server-test-j.prebid.org/openrtb2/auction"),
-//            pbsAccountId = "0689a263-318d-448b-a3d4-b02e8a709d9d",
-//        )
 
         // Load the ads initially
         showAds()
