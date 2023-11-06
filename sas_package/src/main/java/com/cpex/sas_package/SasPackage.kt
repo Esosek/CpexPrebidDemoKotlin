@@ -15,6 +15,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 import kotlin.random.Random
+import com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException
+import com.google.android.gms.common.GooglePlayServicesRepairableException
 
 
 /**
@@ -23,7 +26,7 @@ import kotlin.random.Random
  * Including option to incorporate Prebid.
  */
 object SasPackage {
-    private const val version = "1.0.0"
+    private const val version = "1.1.0"
 
     // Configuration
     private lateinit var instanceUrl: String
@@ -37,10 +40,15 @@ object SasPackage {
     private var consentString: String? = null
     private var cmpVendorId: String? = null
     private var mid: String? = null
-    var interscrollerHeight: Double = 0.0
-        private set
+    private var advertisingId: String? = null
+    private val isCmpVendorEnabled: Boolean
+        get() = Didomi.getInstance().userStatus.vendors.global.enabled.contains(cmpVendorId)
+
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
+
+    var interscrollerHeight: Double = 0.0
+        private set
 
     /**
      * Configures SasPackage, must be called before using other methods. Initializes Didomi SDK.
@@ -88,7 +96,8 @@ object SasPackage {
 
     /**
      * Entry point for showing ads
-     * - Gets current consent status from Didomi
+     * - Gets consent string from Didomi
+     * - Gets advertisingId if possible
      * - Fetches demand from Prebid if enabled
      * - Request ads from SAS incl. keywords for Prebid bids
      * - Renders ad creatives
@@ -102,6 +111,7 @@ object SasPackage {
         }
         coroutineScope.launch {
             consentString = Didomi.getInstance().userStatus.consentString
+            getAdvertisingId(context)
 
             var adjAdUnits = adUnits
             if (enablePrebid) {
@@ -109,7 +119,7 @@ object SasPackage {
             }
 
             val deferredResults = adjAdUnits.map { adUnit ->
-                CoroutineScope(Dispatchers.IO).async {
+                async(Dispatchers.IO) {
                     val result = withContext(Dispatchers.IO) {
                         requestSingleAd(adUnit)
                     }
@@ -138,7 +148,7 @@ object SasPackage {
      * @param context Current app Activity context */
     private fun initDidomiSDK(context: Activity) {
         Log.d(ContentValues.TAG, "Didomi: Initializing SDK")
-        if(Didomi.getInstance().isInitialized) {
+        if (Didomi.getInstance().isInitialized) {
             Log.d(ContentValues.TAG, "Didomi: SDK was already initialized, skipping")
             return
         }
@@ -154,7 +164,10 @@ object SasPackage {
             Didomi.getInstance().onReady {
                 // The SDK is ready, you can now interact with it
                 Log.d(ContentValues.TAG, "Didomi: SDK initialized successfully!")
-                Log.d(ContentValues.TAG, "ConsentString=" + Didomi.getInstance().userStatus.consentString)
+                Log.d(
+                    ContentValues.TAG,
+                    "ConsentString=" + Didomi.getInstance().userStatus.consentString
+                )
             }
         } catch (e: Exception) {
             Log.e(ContentValues.TAG, "Error while initializing the Didomi SDK", e)
@@ -184,6 +197,7 @@ object SasPackage {
                 "random=$random", // Cache buster
                 "site=$site",
                 "mid=${mid ?: ""}",
+                "advId=${advertisingId ?: ""}",
                 consentString?.let { "gdpr=1" },
                 consentString?.let { "consent=$consentString" },
                 "area=${adUnit.name}",
@@ -250,16 +264,42 @@ object SasPackage {
     private fun getMidFromResponse(resHeaders: String) {
         Log.d(logTag, "Trying to get MID from SAS response")
         // Check if vendor enabled
-        if (Didomi.getInstance().userStatus.vendors.global.enabled.contains(cmpVendorId)) {
+        if (isCmpVendorEnabled) {
             val regex = Regex("""mid=(\d+);""")
             val matchResult = regex.find(resHeaders)
             mid = matchResult?.groups?.get(1)?.value
 
             if (mid != null) Log.d(logTag, "MID $mid stored")
             else Log.d(logTag, "No MID found in response")
-        }
-        else {
+        } else {
             Log.d(logTag, "Vendor disable, MID is NOT stored.")
         }
     }
+
+    /** Reads and stores user's Advertising ID if consented.
+     * Used for user synchronization in bid stream.
+     * @param context Current app Activity context
+     */
+    private suspend fun getAdvertisingId(context: Activity) {
+        if (!isCmpVendorEnabled) { // No consent
+            advertisingId = null
+            return
+        }
+        if (advertisingId != null) { // No need for update
+            return
+        }
+        try {
+            advertisingId = withContext(Dispatchers.IO) {
+                getAdvertisingIdInfo(context).id
+            }
+            Log.d(logTag, "Fetched Advertising ID: $advertisingId")
+        } catch (e: IOException) {
+            Log.d(logTag, "Fetching Advertising ID failed: $e")
+        } catch (e: GooglePlayServicesNotAvailableException) {
+            Log.d(logTag, "Fetching Advertising ID failed: $e")
+        } catch (e: GooglePlayServicesRepairableException) {
+            Log.d(logTag, "Fetching Advertising ID failed: $e")
+        }
+    }
+
 }
