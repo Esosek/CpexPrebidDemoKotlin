@@ -251,7 +251,7 @@ object SasPackage {
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Unexpected code ${response.code}")
             // Try to get MID value from SAS response
-            if (mid.isNullOrEmpty()) getMidFromResponse(response.headers.toString())
+            getMidFromResponse(response.headers.toString())
             return response.body?.string() ?: ""
         }
     }
@@ -263,17 +263,20 @@ object SasPackage {
      */
     private fun getMidFromResponse(resHeaders: String) {
         Log.d(logTag, "Trying to get MID from SAS response")
-        // Check if vendor enabled
-        if (isCmpVendorEnabled) {
-            val regex = Regex("""mid=(\d+);""")
-            val matchResult = regex.find(resHeaders)
-            mid = matchResult?.groups?.get(1)?.value
-
-            if (mid != null) Log.d(logTag, "MID $mid stored")
-            else Log.d(logTag, "No MID found in response")
-        } else {
-            Log.d(logTag, "Vendor disable, MID is NOT stored.")
+        if (!isCmpVendorEnabled) { // Check if vendor enabled
+            Log.d(logTag, "Vendor disabled, MID is cleared and NOT stored.")
+            mid = null
+            return
         }
+        if (!mid.isNullOrEmpty()) { // No need to get MID
+            return
+        }
+        val regex = Regex("""mid=(\d+);""")
+        val matchResult = regex.find(resHeaders)
+        mid = matchResult?.groups?.get(1)?.value
+
+        if (mid != null) Log.d(logTag, "MID $mid stored")
+        else Log.d(logTag, "No MID found in response")
     }
 
     /** Reads and stores user's Advertising ID if consented.
