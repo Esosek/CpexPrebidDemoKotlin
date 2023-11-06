@@ -84,8 +84,8 @@ class MainActivity : FragmentActivity() {
                         )
                         "GAM Rendering API" -> startActivity(Intent(this@MainActivity, GamRenderingActivity::class.java))
                         "SAS Package" -> startActivity(Intent(this@MainActivity, SasActivity::class.java))
-
                     }
+                    moduleSpinner.setSelection(0) // Reset the spinner to the "None" selection
                 }
             }
 
