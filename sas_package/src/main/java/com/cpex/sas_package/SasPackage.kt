@@ -1,10 +1,7 @@
 package com.cpex.sas_package
 
 import android.app.Activity
-import android.content.ContentValues
 import android.util.Log
-import io.didomi.sdk.Didomi
-import io.didomi.sdk.DidomiInitializeParameters
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -15,9 +12,6 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.IOException
 import kotlin.random.Random
-import com.google.android.gms.ads.identifier.AdvertisingIdClient.getAdvertisingIdInfo
-import com.google.android.gms.common.GooglePlayServicesNotAvailableException
-import com.google.android.gms.common.GooglePlayServicesRepairableException
 
 
 /**
@@ -37,12 +31,6 @@ object SasPackage {
     private var isInitialized = false
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
     private lateinit var prebid: PrebidHandler
-    private var consentString: String? = null
-    private var cmpVendorId: String? = null
-    private var mid: String? = null
-    private var advertisingId: String? = null
-    private val isCmpVendorEnabled: Boolean
-        get() = Didomi.getInstance().userStatus.vendors.global.enabled.contains(cmpVendorId)
 
     private val random: Int
         get() = (Random.nextDouble() * 100000000).toInt()
@@ -76,11 +64,11 @@ object SasPackage {
         this.instanceUrl = instanceUrl
         site = context.packageName
         this.enablePrebid = enablePrebid
-        this.cmpVendorId = cmpVendorId
+        User.cmpVendorId = cmpVendorId
         this.interscrollerHeight = interscrollerHeight
 
         // Initialize Didomi CMP
-        initDidomiSDK(context)
+        User.initDidomiSDK(context)
 
         // Initialize Prebid if enabled
         if (enablePrebid) {
@@ -110,8 +98,7 @@ object SasPackage {
             )
         }
         coroutineScope.launch {
-            consentString = Didomi.getInstance().userStatus.consentString
-            getAdvertisingId(context)
+            User.updateAdvertisingId(context)
 
             var adjAdUnits = adUnits
             if (enablePrebid) {
@@ -129,7 +116,7 @@ object SasPackage {
 
             val results = deferredResults.associate { deferred -> deferred.await() }
             results.forEach { (adUnit, response) ->
-                SasRendering.renderAd(context, adUnit, response)
+                Rendering.renderAd(context, adUnit, response)
             }
         }
     }
@@ -140,37 +127,6 @@ object SasPackage {
     fun clearAdUnits(adUnits: List<AdUnit>) {
         adUnits.forEach { adUnit ->
             adUnit.clearWebView()
-        }
-    }
-
-    /** Initializes Didomi SDK with CPEx account during SasPackage initialization.
-     * CMP UI must be requested from FragmentActivity.
-     * @param context Current app Activity context */
-    private fun initDidomiSDK(context: Activity) {
-        Log.d(ContentValues.TAG, "Didomi: Initializing SDK")
-        if (Didomi.getInstance().isInitialized) {
-            Log.d(ContentValues.TAG, "Didomi: SDK was already initialized, skipping")
-            return
-        }
-        try {
-            Didomi.getInstance().initialize(
-                context.application,
-                DidomiInitializeParameters(apiKey = "9a8e2159-3781-4da1-9590-fbf86806f86e")
-            )
-
-            // Do not use the Didomi.getInstance() object here for anything else than registering your ready listener
-            // The SDK might not be ready yet
-
-            Didomi.getInstance().onReady {
-                // The SDK is ready, you can now interact with it
-                Log.d(ContentValues.TAG, "Didomi: SDK initialized successfully!")
-                Log.d(
-                    ContentValues.TAG,
-                    "ConsentString=" + Didomi.getInstance().userStatus.consentString
-                )
-            }
-        } catch (e: Exception) {
-            Log.e(ContentValues.TAG, "Error while initializing the Didomi SDK", e)
         }
     }
 
@@ -191,15 +147,17 @@ object SasPackage {
                 if (!key.startsWith("_")) extTargeting += "$key=$value/"
             }
 
+            val consentString = User.consentString
+
             val parameters = listOf(
                 instanceUrl,
                 "hserver", // SAS server endpoint that returns HTML
                 "random=$random", // Cache buster
                 "site=$site",
-                "mid=${mid ?: ""}",
-                "advId=${advertisingId ?: ""}",
-                consentString?.let { "gdpr=1" },
-                consentString?.let { "consent=$consentString" },
+                "mid=${User.mid ?: ""}",
+                "advId=${User.advertisingId ?: ""}",
+                consentString.let { "gdpr=1" },
+                consentString.let { "consent=$consentString" },
                 "area=${adUnit.name}",
                 "size=${adUnit.size[0]}x${adUnit.size[1]}",
                 extTargeting
@@ -251,58 +209,8 @@ object SasPackage {
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw IOException("Unexpected code ${response.code}")
             // Try to get MID value from SAS response
-            getMidFromResponse(response.headers.toString())
+            User.getMidFromResponse(response.headers.toString())
             return response.body?.string() ?: ""
         }
     }
-
-    /**
-     * Extracts the MID (SAS user ID) from the SAS response headers, if available and defined vendor is enabled.
-     *
-     * @param resHeaders The response headers from the SAS server.
-     */
-    private fun getMidFromResponse(resHeaders: String) {
-        Log.d(logTag, "Trying to get MID from SAS response")
-        if (!isCmpVendorEnabled) { // Check if vendor enabled
-            Log.d(logTag, "Vendor disabled, MID is cleared and NOT stored.")
-            mid = null
-            return
-        }
-        if (!mid.isNullOrEmpty()) { // No need to get MID
-            return
-        }
-        val regex = Regex("""mid=(\d+);""")
-        val matchResult = regex.find(resHeaders)
-        mid = matchResult?.groups?.get(1)?.value
-
-        if (mid != null) Log.d(logTag, "MID $mid stored")
-        else Log.d(logTag, "No MID found in response")
-    }
-
-    /** Reads and stores user's Advertising ID if consented.
-     * Used for user synchronization in bid stream.
-     * @param context Current app Activity context
-     */
-    private suspend fun getAdvertisingId(context: Activity) {
-        if (!isCmpVendorEnabled) { // No consent
-            advertisingId = null
-            return
-        }
-        if (advertisingId != null) { // No need for update
-            return
-        }
-        try {
-            advertisingId = withContext(Dispatchers.IO) {
-                getAdvertisingIdInfo(context).id
-            }
-            Log.d(logTag, "Fetched Advertising ID: $advertisingId")
-        } catch (e: IOException) {
-            Log.d(logTag, "Fetching Advertising ID failed: $e")
-        } catch (e: GooglePlayServicesNotAvailableException) {
-            Log.d(logTag, "Fetching Advertising ID failed: $e")
-        } catch (e: GooglePlayServicesRepairableException) {
-            Log.d(logTag, "Fetching Advertising ID failed: $e")
-        }
-    }
-
 }

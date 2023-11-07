@@ -15,7 +15,7 @@ import kotlin.math.roundToInt
  * A singleton helper object responsible for rendering ads into LayoutTree
  * Using WebView, resizing ad parent layout and handling interscroller custom format
  */
-object SasRendering {
+object Rendering {
     private const val logTag = "SasRendering"
 
     /**

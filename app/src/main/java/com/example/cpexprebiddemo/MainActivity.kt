@@ -17,11 +17,11 @@ class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main) // Set the XML layout here
-        initDidomiSDK()
+        //initDidomiSDK()
 
         // Display CMP UI
         // Always call it, checks internally if it's required
-        Didomi.getInstance().setupUI(this)
+        //Didomi.getInstance().setupUI(this)
 
         // Display and handle dropdown that loads different adapters
         spinnerHandler()
