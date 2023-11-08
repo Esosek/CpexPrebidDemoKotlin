@@ -37,6 +37,7 @@ class ExampleActivity : FragmentActivity() {
         SasPackage.initialize(
             context = this,
             instanceUrl = "https://optimics-ads.aimatch.com/optimics",
+            appDomain = "https%3A%2F%2Fwww.cpex.cz",
             enablePrebid = true,
             pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
             pbsAccountId = "10900-cpex-saswrapper-1",

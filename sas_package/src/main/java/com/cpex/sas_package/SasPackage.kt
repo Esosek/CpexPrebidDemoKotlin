@@ -25,6 +25,7 @@ object SasPackage {
     // Configuration
     private lateinit var instanceUrl: String
     private lateinit var site: String
+    private var appDomain: String? = null
     private var enablePrebid = false
 
     private const val logTag = "SasPackage"
@@ -42,6 +43,7 @@ object SasPackage {
      * Configures SasPackage, must be called before using other methods. Initializes Didomi SDK.
      * @param context Current activity context. Required primarily for Prebid and Didomi SDK initialization.
      * @param instanceUrl Base domain of SAS ad server instance
+     * @param appDomain Encoded domain of the app (eg. "https%3A%2F%2Fwww.cpex.cz")
      * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
      * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
      * @param pbsAccountId (Required if Prebid enabled) ID of the wrapper stored on Prebid Server
@@ -53,6 +55,7 @@ object SasPackage {
     fun initialize(
         context: Activity,
         instanceUrl: String,
+        appDomain: String? = null,
         enablePrebid: Boolean = false,
         pbsHost: String? = null,
         pbsAccountId: String? = null,
@@ -63,6 +66,7 @@ object SasPackage {
     ) {
         this.instanceUrl = instanceUrl
         site = context.packageName
+        this.appDomain = appDomain
         this.enablePrebid = enablePrebid
         User.cmpVendorId = cmpVendorId
         this.interscrollerHeight = interscrollerHeight
@@ -154,8 +158,9 @@ object SasPackage {
                 "hserver", // SAS server endpoint that returns HTML
                 "random=$random", // Cache buster
                 "site=$site",
+                appDomain.let { "appUrl=$appDomain" },
                 "mid=${User.mid ?: ""}",
-                "advId=${User.advertisingId ?: ""}",
+                "devId=${User.advertisingId ?: ""}",
                 consentString.let { "gdpr=1" },
                 consentString.let { "consent=$consentString" },
                 "area=${adUnit.name}",
