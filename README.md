@@ -34,7 +34,7 @@ dependencies {
 
 4. Initialize SasPackage object in the first app Activity. Since SasPackage tries to initialize Didomi SDK, that activity has to be of type **FragmentActivity**. You may also initialize Didomi SDK yourself, see [Didomi docs](https://developers.didomi.io/cmp/mobile-sdk/android/setup). Be sure to call `Didomi.getInstance().setupUI(this)` to display CMP UI if it's needed.
 
-**Example of configuration**
+**Example of recommended configuration**
 
 ```kotlin
 import com.cpex.sas_package.SasPackage
@@ -47,7 +47,6 @@ class ExampleActivity : FragmentActivity() {
         SasPackage.initialize(
             context = this,
             instanceUrl = "https://optimics-ads.aimatch.com/optimics",
-            enablePrebid = true,
             pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
             pbsAccountId = "10900-cpex-saswrapper-1",
             cmpVendorId = "c:custom_vendor",
