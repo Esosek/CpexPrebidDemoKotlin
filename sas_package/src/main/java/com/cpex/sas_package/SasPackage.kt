@@ -26,7 +26,7 @@ object SasPackage {
     private lateinit var instanceUrl: String
     private lateinit var site: String
     private var appDomain: String? = null
-    private var enablePrebid = false
+    private var prebidEnabled = true
 
     private const val logTag = "SasPackage"
     private var isInitialized = false
@@ -44,9 +44,9 @@ object SasPackage {
      * @param context Current activity context. Required primarily for Prebid and Didomi SDK initialization.
      * @param instanceUrl Base domain of SAS ad server instance
      * @param appDomain (Optional) Encoded domain of the app (eg. "https%3A%2F%2Fwww.cpex.cz")
-     * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
-     * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
-     * @param pbsAccountId (Required if Prebid enabled) ID of the wrapper stored on Prebid Server
+     * @param pbsHost Hosted domain of the Prebid Server including /openrtb2/auction endpoint
+     * @param pbsAccountId ID of the wrapper stored on Prebid Server
+     * @param prebidEnabled (Optional) Set to false if Prebid should be disabled, use with caution
      * @param pbsTimeoutMs (Optional) Time in milliseconds to wait for Prebid Server response, defaults to 1000ms
      * @param cmpVendorId (Optional) Publisher's Didomi ID for storing MID in localStorage, MID won't be stored if consent disabled or ID is missing
      * @param bidderTable (Optional) Translation table for Prebid bidder name to SAS partner name, defaults to "headerbid-app" for bidders that are not explicitly set
@@ -55,10 +55,10 @@ object SasPackage {
     fun initialize(
         context: Activity,
         instanceUrl: String,
+        pbsHost: String,
+        pbsAccountId: String,
         appDomain: String? = null,
-        enablePrebid: Boolean = false,
-        pbsHost: String? = null,
-        pbsAccountId: String? = null,
+        prebidEnabled: Boolean = true,
         pbsTimeoutMs: Int = 1000,
         cmpVendorId: String? = null,
         bidderTable: Map<String, String> = emptyMap(),
@@ -67,7 +67,7 @@ object SasPackage {
         this.instanceUrl = instanceUrl
         site = context.packageName
         this.appDomain = appDomain
-        this.enablePrebid = enablePrebid
+        this.prebidEnabled = prebidEnabled
         User.cmpVendorId = cmpVendorId
         this.interscrollerHeight = interscrollerHeight
 
@@ -75,12 +75,8 @@ object SasPackage {
         User.initDidomiSDK(context)
 
         // Initialize Prebid if enabled
-        if (enablePrebid) {
-            if (pbsHost == null || pbsAccountId == null) {
-                Log.e(logTag, "Missing configuration for Prebid, initialization failed")
-            } else {
-                prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs, bidderTable)
-            }
+        if (prebidEnabled) {
+            prebid = PrebidHandler(context, pbsHost, pbsAccountId, pbsTimeoutMs, bidderTable)
         }
         isInitialized = true
         Log.d(logTag, "SasPackage $version initialized successfully")
@@ -105,7 +101,7 @@ object SasPackage {
             User.updateAdvertisingId(context)
 
             var adjAdUnits = adUnits
-            if (enablePrebid) {
+            if (prebidEnabled) {
                 adjAdUnits = prebid.requestAds(adUnits)
             }
 
