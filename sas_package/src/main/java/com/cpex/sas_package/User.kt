@@ -16,11 +16,25 @@ object User {
     private const val logTag = "User"
 
     var cmpVendorId: String? = null
+    var evalConsentForId: Boolean = true
     var consentString: String = ""
         get() = Didomi.getInstance().userStatus.consentString
         private set
     var mid: String? = null
-        private set
+        get() {
+            if (evalConsentForId && !isCmpVendorEnabled) {
+                Log.d(logTag, "Vendor disabled, returning null MID")
+                return null
+            }
+            return field
+        }
+        private set(value) {
+            if (evalConsentForId && !isCmpVendorEnabled) {
+                Log.d(logTag, "Vendor disabled, MID is cleared and NOT stored.")
+                field = null
+            }
+            field = value
+        }
     var advertisingId: String? = null
         private set
     private val isCmpVendorEnabled: Boolean
@@ -64,10 +78,6 @@ object User {
      */
     fun getMidFromResponse(resHeaders: String): String? {
         Log.d(logTag, "Trying to get MID from SAS response")
-        if (!isCmpVendorEnabled) { // Check if vendor enabled
-            Log.d(logTag, "Vendor disabled, MID is cleared and NOT stored.")
-            return null
-        }
         if (!mid.isNullOrEmpty()) { // No need to get MID
             return mid
         }
@@ -85,7 +95,7 @@ object User {
      * @param context Current app Activity context
      */
     suspend fun updateAdvertisingId(context: Activity) {
-        if (!isCmpVendorEnabled) { // No consent
+        if (evalConsentForId && !isCmpVendorEnabled) { // No consent
             advertisingId = null
             return
         }

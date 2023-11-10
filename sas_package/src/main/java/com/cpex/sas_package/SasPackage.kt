@@ -61,6 +61,7 @@ object SasPackage {
         prebidEnabled: Boolean = true,
         pbsTimeoutMs: Int = 1000,
         cmpVendorId: String? = null,
+        evalConsentForId: Boolean = true,
         bidderTable: Map<String, String> = emptyMap(),
         interscrollerHeight: Double = .5
     ) {
@@ -69,6 +70,7 @@ object SasPackage {
         this.appDomain = appDomain
         this.prebidEnabled = prebidEnabled
         User.cmpVendorId = cmpVendorId
+        User.evalConsentForId = evalConsentForId
         this.interscrollerHeight = interscrollerHeight
 
         // Initialize Didomi CMP

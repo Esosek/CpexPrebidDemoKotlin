@@ -41,7 +41,9 @@ class ExampleActivity : FragmentActivity() {
             prebidEnabled = true,
             pbsHost = "https://prebid-server.rubiconproject.com/openrtb2/auction",
             pbsAccountId = "10900-cpex-saswrapper-1",
+            pbsTimeoutMs = 1000,
             cmpVendorId = "570",
+            evalConsentForId = true,
             bidderTable = mapOf(
                 "rubicon" to "magnite_hb_app"
                 // other bidders ...
