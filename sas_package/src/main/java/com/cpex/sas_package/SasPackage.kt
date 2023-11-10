@@ -73,8 +73,8 @@ object SasPackage {
         User.evalConsentForId = evalConsentForId
         this.interscrollerHeight = interscrollerHeight
 
-        // Initialize Didomi CMP
-        User.initDidomiSDK(context)
+        // Initializes Didomi CMP and reads MID from localStorage
+        User.init(context)
 
         // Initialize Prebid if enabled
         if (prebidEnabled) {
