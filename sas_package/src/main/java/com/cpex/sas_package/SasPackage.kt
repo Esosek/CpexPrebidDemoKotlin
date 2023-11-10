@@ -20,7 +20,7 @@ import kotlin.random.Random
  * Including option to incorporate Prebid.
  */
 object SasPackage {
-    private const val version = "1.1.0"
+    private const val version = "1.2.0"
 
     // Configuration
     private lateinit var instanceUrl: String
@@ -43,7 +43,7 @@ object SasPackage {
      * Configures SasPackage, must be called before using other methods. Initializes Didomi SDK.
      * @param context Current activity context. Required primarily for Prebid and Didomi SDK initialization.
      * @param instanceUrl Base domain of SAS ad server instance
-     * @param appDomain Encoded domain of the app (eg. "https%3A%2F%2Fwww.cpex.cz")
+     * @param appDomain (Optional) Encoded domain of the app (eg. "https%3A%2F%2Fwww.cpex.cz")
      * @param enablePrebid (Optional) Set to true if Prebid should be used and provide additional params
      * @param pbsHost (Required if Prebid enabled) Hosted domain of the Prebid Server including /openrtb2/auction endpoint
      * @param pbsAccountId (Required if Prebid enabled) ID of the wrapper stored on Prebid Server
@@ -160,7 +160,7 @@ object SasPackage {
                 "site=$site",
                 appDomain.let { "appUrl=$appDomain" },
                 "mid=${User.mid ?: ""}",
-                "devId=${User.advertisingId ?: ""}",
+                "ifa=${User.advertisingId ?: ""}",
                 consentString.let { "gdpr=1" },
                 consentString.let { "consent=$consentString" },
                 "area=${adUnit.name}",
